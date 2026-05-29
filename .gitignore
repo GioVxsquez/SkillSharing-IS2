@@ -1,0 +1,49 @@
+# maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# intellij idea
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# vs code
+.vscode/
+*.code-workspace
+
+# eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# archivos de ambiente
+.env
+*.env.local
+
+# logs
+*.log
+logs/
+
+# archivos subidos por usuarios (hu05 - materiales educativos)
+uploads/
+*.pdf
+*.docx
+*.xlsx
+
+# sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# build de docker
+*.tar
+
+# maven local descargado por setup.ps1
+.maven/
