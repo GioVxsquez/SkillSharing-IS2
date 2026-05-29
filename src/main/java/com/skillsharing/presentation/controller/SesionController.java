@@ -72,4 +72,17 @@ public class SesionController {
         SesionAprendizaje sesion = sesionService.obtenerDetalle(id);
         return ResponseEntity.ok(ApiResponse.exito("detalle de sesion", SesionResponseDto.fromEntity(sesion)));
     }
+
+    // hu02: visualizar eventos gestionados
+    @GetMapping("/mis-eventos")
+    public ResponseEntity<ApiResponse<List<SesionResponseDto>>> misEventos(Authentication auth) {
+        Usuario instructor = usuarioRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("usuario no encontrado"));
+                
+        List<SesionResponseDto> lista = sesionService.listarPorInstructor(instructor.getUsuarioId()).stream()
+                .map(SesionResponseDto::fromEntity)
+                .collect(Collectors.toList());
+                
+        return ResponseEntity.ok(ApiResponse.exito("mis eventos gestionados", lista));
+    }
 }

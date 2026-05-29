@@ -49,12 +49,24 @@ public class AuthController {
                 .email(dto.getEmail())
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .rol(rol)
-                .activo(true)
+                .activo(false) // hu29: se registra inactivo hasta activar
                 .build();
 
         usuarioRepository.save(usuario);
 
-        return ResponseEntity.ok(ApiResponse.exito("usuario registrado correctamente", null));
+        return ResponseEntity.ok(ApiResponse.exito("usuario registrado correctamente, revise su correo para activar", null));
+    }
+
+    // hu29: activar cuenta
+    @PostMapping("/activar")
+    public ResponseEntity<ApiResponse<String>> activar(@RequestParam String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("usuario no encontrado"));
+        
+        usuario.setActivo(true);
+        usuarioRepository.save(usuario);
+        
+        return ResponseEntity.ok(ApiResponse.exito("cuenta activada exitosamente", null));
     }
 
     @PostMapping("/login")
