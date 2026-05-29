@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -49,7 +50,7 @@ public class AuthController {
                 .email(dto.getEmail())
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .rol(rol)
-                .activo(false) // hu29: se registra inactivo hasta activar
+                .activo(true) // hu14: la cuenta se activa directamente al registrarse
                 .build();
 
         usuarioRepository.save(usuario);

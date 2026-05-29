@@ -24,7 +24,6 @@ public class SesionResponseDto {
     private String habilidadRequerida;
     private Boolean materialCargado;
     private LocalDateTime fechaCreacion;
-    private long totalInscritos;
 
     // conversion desde entidad al dto (patron de mapeo)
     public static SesionResponseDto fromEntity(SesionAprendizaje s) {
