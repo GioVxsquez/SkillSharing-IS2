@@ -11,7 +11,7 @@
 
 -- tabla de usuarios
 CREATE TABLE usuario (
-    usuario_id      SERIAL PRIMARY KEY,
+    usuario_id      BIGSERIAL PRIMARY KEY,
     nombre          VARCHAR(100) NOT NULL,
     email           VARCHAR(150) NOT NULL UNIQUE,
     password        VARCHAR(255) NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE usuario (
 -- tabla de habilidades (reemplaza a categoria del myevent original)
 -- hu28: el buscador filtra sesiones por habilidad requerida
 CREATE TABLE habilidad (
-    habilidad_id  SERIAL PRIMARY KEY,
+    habilidad_id  BIGSERIAL PRIMARY KEY,
     nombre        VARCHAR(100) NOT NULL UNIQUE,
     descripcion   VARCHAR(300)
 );
@@ -32,8 +32,8 @@ CREATE TABLE habilidad (
 -- hu22: relacion muchos a muchos entre usuario y habilidad
 -- un usuario puede tener varias habilidades en su perfil
 CREATE TABLE usuario_habilidad (
-    usuario_id   INTEGER NOT NULL REFERENCES usuario(usuario_id)   ON DELETE CASCADE,
-    habilidad_id INTEGER NOT NULL REFERENCES habilidad(habilidad_id) ON DELETE CASCADE,
+    usuario_id   BIGINT NOT NULL REFERENCES usuario(usuario_id)   ON DELETE CASCADE,
+    habilidad_id BIGINT NOT NULL REFERENCES habilidad(habilidad_id) ON DELETE CASCADE,
     PRIMARY KEY (usuario_id, habilidad_id)
 );
 
@@ -41,7 +41,7 @@ CREATE TABLE usuario_habilidad (
 -- tiene habilidad_requerida en lugar de categoria social
 -- el campo material_cargado controla si el admin puede aprobarla (hu05)
 CREATE TABLE sesion_aprendizaje (
-    sesion_id           SERIAL PRIMARY KEY,
+    sesion_id           BIGSERIAL PRIMARY KEY,
     titulo              VARCHAR(200) NOT NULL,
     descripcion         TEXT,
     fecha_sesion        TIMESTAMP    NOT NULL,
@@ -50,8 +50,8 @@ CREATE TABLE sesion_aprendizaje (
     max_participantes   INTEGER      NOT NULL DEFAULT 20,
     link_sesion         VARCHAR(500),
     lugar               VARCHAR(300),
-    instructor_id       INTEGER      NOT NULL REFERENCES usuario(usuario_id),
-    habilidad_id        INTEGER      REFERENCES habilidad(habilidad_id),
+    instructor_id       BIGINT      NOT NULL REFERENCES usuario(usuario_id),
+    habilidad_id        BIGINT      REFERENCES habilidad(habilidad_id),
     -- hu05: flag que indica si ya se subio al menos un material educativo
     -- el admin no puede aprobar si esto es false
     material_cargado    BOOLEAN      NOT NULL DEFAULT FALSE,
@@ -61,20 +61,20 @@ CREATE TABLE sesion_aprendizaje (
 -- hu05: material educativo obligatorio para aprobacion de la sesion
 -- el instructor debe subir al menos un archivo (pdf, etc) antes de que el admin apruebe
 CREATE TABLE material_educativo (
-    material_id     SERIAL PRIMARY KEY,
+    material_id     BIGSERIAL PRIMARY KEY,
     nombre          VARCHAR(200) NOT NULL,
     ruta_archivo    VARCHAR(500) NOT NULL,
     tipo_archivo    VARCHAR(50)  NOT NULL DEFAULT 'PDF',
-    sesion_id       INTEGER      NOT NULL REFERENCES sesion_aprendizaje(sesion_id) ON DELETE CASCADE,
+    sesion_id       BIGINT      NOT NULL REFERENCES sesion_aprendizaje(sesion_id) ON DELETE CASCADE,
     fecha_subida    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- inscripcion reemplaza a participacion del myevent original
 -- un usuario se inscribe a una sesion en rol de aprendiz
 CREATE TABLE inscripcion (
-    inscripcion_id    SERIAL PRIMARY KEY,
-    sesion_id         INTEGER   NOT NULL REFERENCES sesion_aprendizaje(sesion_id) ON DELETE CASCADE,
-    usuario_id        INTEGER   NOT NULL REFERENCES usuario(usuario_id)           ON DELETE CASCADE,
+    inscripcion_id    BIGSERIAL PRIMARY KEY,
+    sesion_id         BIGINT   NOT NULL REFERENCES sesion_aprendizaje(sesion_id) ON DELETE CASCADE,
+    usuario_id        BIGINT   NOT NULL REFERENCES usuario(usuario_id)           ON DELETE CASCADE,
     rol_sesion        VARCHAR(20) NOT NULL DEFAULT 'APRENDIZ',
     fecha_inscripcion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (sesion_id, usuario_id)
@@ -83,9 +83,9 @@ CREATE TABLE inscripcion (
 -- notificaciones para usuarios cuando una sesion cambia de estado
 -- patron observer (semana 5): se crea automaticamente al aprobar/rechazar una sesion
 CREATE TABLE notificacion (
-    notificacion_id SERIAL PRIMARY KEY,
-    usuario_id      INTEGER    NOT NULL REFERENCES usuario(usuario_id)            ON DELETE CASCADE,
-    sesion_id       INTEGER    REFERENCES sesion_aprendizaje(sesion_id)           ON DELETE SET NULL,
+    notificacion_id BIGSERIAL PRIMARY KEY,
+    usuario_id      BIGINT    NOT NULL REFERENCES usuario(usuario_id)            ON DELETE CASCADE,
+    sesion_id       BIGINT    REFERENCES sesion_aprendizaje(sesion_id)           ON DELETE SET NULL,
     mensaje         VARCHAR(300) NOT NULL,
     visto           BOOLEAN    NOT NULL DEFAULT FALSE,
     fecha_creacion  TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP
