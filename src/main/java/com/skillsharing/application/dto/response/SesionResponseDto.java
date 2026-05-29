@@ -1,15 +1,9 @@
 package com.skillsharing.application.dto.response;
-
 import com.skillsharing.domain.entity.SesionAprendizaje;
 import lombok.Data;
 import java.time.LocalDateTime;
-
-// dto de respuesta para sesiones - el controller nunca expone la entidad jpa directamente
-// principio dip (semana 2): la capa web depende del dto, no de la entidad de dominio
-// poo (semana 1): encapsulamiento - el cliente solo ve lo que necesita ver
 @Data
 public class SesionResponseDto {
-
     private Long sesionId;
     private String titulo;
     private String descripcion;
@@ -25,8 +19,6 @@ public class SesionResponseDto {
     private Boolean materialCargado;
     private LocalDateTime fechaCreacion;
     private long totalInscritos;
-
-    // conversion desde entidad al dto (patron de mapeo)
     public static SesionResponseDto fromEntity(SesionAprendizaje s) {
         SesionResponseDto dto = new SesionResponseDto();
         dto.setSesionId(s.getSesionId());
