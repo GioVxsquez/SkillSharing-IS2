@@ -51,7 +51,9 @@ public class AuthController {
                     .body(new ApiResponse<>(false, "El email ya está registrado", null));
         }
 
-        RolUsuario rol = dto.getRol() != null ? dto.getRol() : RolUsuario.APRENDIZ;
+        RolUsuario rol = (dto.getRol() != null && !dto.getRol().trim().isEmpty()) 
+                ? RolUsuario.valueOf(dto.getRol().toUpperCase()) 
+                : RolUsuario.APRENDIZ;
 
         // cuenta inactiva hasta que verifique el correo - HU29
         Usuario usuario = Usuario.builder()
