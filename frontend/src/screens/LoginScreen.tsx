@@ -20,7 +20,7 @@ export default function LoginScreen({ navigation }: any) {
     setLoading(true);
     try {
       const response = await api.post('/auth/login', { email, password });
-      if (response.data.exito && response.data.data?.token) {
+      if (response.data.ok && response.data.data?.token) {
         await AsyncStorage.setItem('userToken', response.data.data.token);
         navigation.replace('Home');
       } else {

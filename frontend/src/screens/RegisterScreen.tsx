@@ -37,7 +37,7 @@ export default function RegisterScreen({ navigation }: any) {
         rol: isInstructor ? 'INSTRUCTOR' : 'APRENDIZ',
       });
 
-      if (response.data.exito) {
+      if (response.data.ok) {
         Alert.alert(
           '¡Registro exitoso!',
           'Revisa tu bandeja de entrada para activar tu cuenta antes de iniciar sesión.',
