@@ -53,6 +53,12 @@ public class SesionController {
         return ResponseEntity.ok(ApiResponse.exito("sesiones activas recuperadas", lista));
     }
 
+    // hu16: listar sesiones publicas para la pantalla principal del aplicativo
+    @GetMapping("/publicas")
+    public ResponseEntity<ApiResponse<List<SesionResponseDto>>> listarPublicas() {
+        return listarActivas();
+    }
+
     // hu28: buscar sesiones por habilidad o titulo usando el patron strategy
     @GetMapping("/buscar")
     public ResponseEntity<ApiResponse<List<SesionResponseDto>>> buscar(
