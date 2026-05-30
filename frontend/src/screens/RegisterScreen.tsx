@@ -7,12 +7,12 @@ import {
 import { api } from '../api/config';
 
 export default function RegisterScreen({ navigation }: any) {
-  const [nombre, setNombre]           = useState('');
-  const [email, setEmail]             = useState('');
-  const [password, setPassword]       = useState('');
+  const [nombre, setNombre] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [confirmPassword, setConfirm] = useState('');
   const [isInstructor, setIsInstructor] = useState(false);
-  const [loading, setLoading]         = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleRegistro = async () => {
     if (!nombre || !email || !password || !confirmPassword) {
@@ -20,11 +20,11 @@ export default function RegisterScreen({ navigation }: any) {
       return;
     }
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Las contraseñas no coinciden.');
+      Alert.alert('Error', 'Las contrasenas no coinciden.');
       return;
     }
     if (password.length < 6) {
-      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres.');
+      Alert.alert('Error', 'La contrasena debe tener al menos 6 caracteres.');
       return;
     }
 
@@ -39,8 +39,8 @@ export default function RegisterScreen({ navigation }: any) {
 
       if (response.data.ok) {
         Alert.alert(
-          '¡Registro exitoso!',
-          'Revisa tu bandeja de entrada para activar tu cuenta antes de iniciar sesión.',
+          'Registro exitoso',
+          'Ya puedes iniciar sesion con tu cuenta.',
           [{ text: 'Entendido', onPress: () => navigation.navigate('Login') }]
         );
       } else {
@@ -61,20 +61,17 @@ export default function RegisterScreen({ navigation }: any) {
     >
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-
-        {/* Logo */}
         <View style={styles.logoContainer}>
           <Image source={require('../../assets/logo.png')} style={styles.logo} resizeMode="contain" />
         </View>
 
         <Text style={styles.titulo}>Crea tu Cuenta</Text>
 
-        {/* Campos */}
         <View style={styles.campo}>
-          <Text style={styles.label}>Nombre Completo</Text>
+          <Text style={styles.label}>Nombre completo</Text>
           <TextInput
             style={styles.input}
-            placeholder="Juan Pérez"
+            placeholder="Juan Perez"
             placeholderTextColor="#B0B8C1"
             value={nombre}
             onChangeText={setNombre}
@@ -82,7 +79,7 @@ export default function RegisterScreen({ navigation }: any) {
         </View>
 
         <View style={styles.campo}>
-          <Text style={styles.label}>Correo Electrónico</Text>
+          <Text style={styles.label}>Correo electronico</Text>
           <TextInput
             style={styles.input}
             placeholder="correo@ejemplo.com"
@@ -96,10 +93,10 @@ export default function RegisterScreen({ navigation }: any) {
         </View>
 
         <View style={styles.campo}>
-          <Text style={styles.label}>Contraseña</Text>
+          <Text style={styles.label}>Contrasena</Text>
           <TextInput
             style={styles.input}
-            placeholder="••••••••"
+            placeholder="********"
             placeholderTextColor="#B0B8C1"
             value={password}
             onChangeText={setPassword}
@@ -108,10 +105,10 @@ export default function RegisterScreen({ navigation }: any) {
         </View>
 
         <View style={styles.campo}>
-          <Text style={styles.label}>Confirmar Contraseña</Text>
+          <Text style={styles.label}>Confirmar contrasena</Text>
           <TextInput
             style={styles.input}
-            placeholder="••••••••"
+            placeholder="********"
             placeholderTextColor="#B0B8C1"
             value={confirmPassword}
             onChangeText={setConfirm}
@@ -119,7 +116,6 @@ export default function RegisterScreen({ navigation }: any) {
           />
         </View>
 
-        {/* Selector de rol */}
         <View style={styles.rolContainer}>
           <Text style={styles.label}>Quiero registrarme como:</Text>
           <View style={styles.rolBotones}>
@@ -128,7 +124,7 @@ export default function RegisterScreen({ navigation }: any) {
               onPress={() => setIsInstructor(false)}
             >
               <Text style={[styles.rolTexto, !isInstructor && styles.rolTextoActivo]}>
-                🎓 Aprendiz
+                Aprendiz
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -136,13 +132,12 @@ export default function RegisterScreen({ navigation }: any) {
               onPress={() => setIsInstructor(true)}
             >
               <Text style={[styles.rolTexto, isInstructor && styles.rolTextoActivo]}>
-                📚 Instructor
+                Instructor
               </Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Botón principal */}
         <TouchableOpacity
           style={[styles.botonPrincipal, loading && styles.botonDeshabilitado]}
           onPress={handleRegistro}
@@ -154,14 +149,12 @@ export default function RegisterScreen({ navigation }: any) {
             : <Text style={styles.botonTexto}>Registrarme</Text>}
         </TouchableOpacity>
 
-        {/* Enlace a Login */}
         <View style={styles.pie}>
-          <Text style={styles.pieTexto}>¿Ya tienes cuenta? </Text>
+          <Text style={styles.pieTexto}>Ya tienes cuenta? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.enlace}>Inicia sesión</Text>
+            <Text style={styles.enlace}>Inicia sesion</Text>
           </TouchableOpacity>
         </View>
-
       </ScrollView>
     </KeyboardAvoidingView>
   );
