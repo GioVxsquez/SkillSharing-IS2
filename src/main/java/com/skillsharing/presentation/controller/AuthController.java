@@ -1,7 +1,7 @@
 package com.skillsharing.presentation.controller;
 
-import com.skillsharing.application.dto.request.LoginRequestDto;
-import com.skillsharing.application.dto.request.RegistroRequestDto;
+import com.skillsharing.application.dto.request.LoginDto;
+import com.skillsharing.application.dto.request.UsuarioRegistroDto;
 import com.skillsharing.application.dto.response.ApiResponse;
 import com.skillsharing.application.service.EmailService;
 import com.skillsharing.domain.entity.Usuario;
@@ -9,7 +9,7 @@ import com.skillsharing.domain.entity.VerificacionToken;
 import com.skillsharing.domain.enums.RolUsuario;
 import com.skillsharing.infrastructure.repository.UsuarioRepository;
 import com.skillsharing.infrastructure.repository.VerificacionTokenRepository;
-import com.skillsharing.infrastructure.security.JwtService;
+import com.skillsharing.infrastructure.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -39,13 +39,13 @@ public class AuthController {
     private final UsuarioRepository       usuarioRepository;
     private final PasswordEncoder          passwordEncoder;
     private final AuthenticationManager   authenticationManager;
-    private final JwtService               jwtService;
+    private final JwtUtil                  jwtUtil;
     private final EmailService             emailService;
     private final VerificacionTokenRepository tokenRepository;
 
     // HU14: registrarse - crea la cuenta inactiva y envia correo de verificacion
     @PostMapping("/registro")
-    public ResponseEntity<ApiResponse<String>> registro(@RequestBody RegistroRequestDto dto) {
+    public ResponseEntity<ApiResponse<String>> registro(@RequestBody UsuarioRegistroDto dto) {
         if (usuarioRepository.existsByEmail(dto.getEmail())) {
             return ResponseEntity.badRequest()
                     .body(new ApiResponse<>(false, "El email ya está registrado", null));
@@ -84,13 +84,13 @@ public class AuthController {
 
     // HU15: iniciar sesion - devuelve el jwt si las credenciales son correctas
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<Map<String, String>>> login(@RequestBody LoginRequestDto dto) {
+    public ResponseEntity<ApiResponse<Map<String, String>>> login(@RequestBody LoginDto dto) {
         try {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword())
             );
             UserDetails userDetails = (UserDetails) auth.getPrincipal();
-            String jwt = jwtService.generateToken(userDetails);
+            String jwt = jwtUtil.generateToken(userDetails);
             return ResponseEntity.ok(new ApiResponse<>(true, "Login exitoso",
                     Map.of("token", jwt)));
 
