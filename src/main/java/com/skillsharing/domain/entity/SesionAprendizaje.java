@@ -2,6 +2,7 @@ package com.skillsharing.domain.entity;
 
 import com.skillsharing.domain.enums.EstadoSesion;
 import com.skillsharing.domain.enums.ModalidadSesion;
+import com.skillsharing.domain.enums.TipoSesion;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -34,14 +35,23 @@ public class SesionAprendizaje {
     // virtual o presencial
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
+    @Builder.Default
     private ModalidadSesion modalidad = ModalidadSesion.VIRTUAL;
 
     // patron state (semana 5): pendiente -> activa -> finalizada / rechazada
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
+    @Builder.Default
     private EstadoSesion estado = EstadoSesion.PENDIENTE;
 
+    // hu01: define si la sesion aparece en el catalogo o solo por invitacion
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private TipoSesion tipo = TipoSesion.PUBLICA;
+
     @Column(name = "max_participantes", nullable = false)
+    @Builder.Default
     private Integer maxParticipantes = 20;
 
     // enlace de videollamada si la sesion es virtual
@@ -66,12 +76,15 @@ public class SesionAprendizaje {
     // hu05: el admin solo puede aprobar si esto es true
     // el instructor sube el material educativo -> se actualiza a true
     @Column(name = "material_cargado", nullable = false)
+    @Builder.Default
     private Boolean materialCargado = false;
 
     // materiales educativos asociados a esta sesion (hu05)
     @OneToMany(mappedBy = "sesion", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<MaterialEducativo> materiales = new ArrayList<>();
 
     @Column(name = "fecha_creacion", nullable = false)
+    @Builder.Default
     private LocalDateTime fechaCreacion = LocalDateTime.now();
 }

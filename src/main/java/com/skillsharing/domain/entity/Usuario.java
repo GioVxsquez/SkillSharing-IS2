@@ -43,15 +43,19 @@ public class Usuario {
         joinColumns        = @JoinColumn(name = "usuario_id"),
         inverseJoinColumns = @JoinColumn(name = "habilidad_id")
     )
+    @Builder.Default
     private Set<Habilidad> habilidades = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
+    @Builder.Default
     private RolUsuario rol = RolUsuario.APRENDIZ;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean activo = true;
 
     @Column(name = "fecha_registro", nullable = false)
+    @Builder.Default
     private LocalDateTime fechaRegistro = LocalDateTime.now();
 }

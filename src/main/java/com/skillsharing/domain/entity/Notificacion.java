@@ -30,8 +30,10 @@ public class Notificacion {
     private String mensaje;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean visto = false;
 
     @Column(name = "fecha_creacion", nullable = false)
+    @Builder.Default
     private LocalDateTime fechaCreacion = LocalDateTime.now();
 }

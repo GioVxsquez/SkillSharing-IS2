@@ -26,6 +26,12 @@ public class SesionRequestDto {
 
     private Integer maxParticipantes = 20;
 
+    // hu01: PUBLICA aparece en el catalogo, PRIVADA se maneja por invitaciones
+    private String tipo = "PUBLICA";
+
+    // alias para pantallas moviles que mandan un switch booleano
+    private Boolean privada;
+
     // solo para sesiones virtuales
     private String linkSesion;
 

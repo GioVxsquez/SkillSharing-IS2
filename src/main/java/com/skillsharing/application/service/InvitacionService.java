@@ -1,10 +1,13 @@
 package com.skillsharing.application.service;
 
 import com.skillsharing.domain.entity.Invitacion;
+import com.skillsharing.domain.entity.Notificacion;
 import com.skillsharing.domain.entity.SesionAprendizaje;
 import com.skillsharing.domain.entity.Usuario;
 import com.skillsharing.domain.enums.EstadoInvitacion;
+import com.skillsharing.domain.enums.TipoSesion;
 import com.skillsharing.infrastructure.repository.InvitacionRepository;
+import com.skillsharing.infrastructure.repository.NotificacionRepository;
 import com.skillsharing.infrastructure.repository.SesionRepository;
 import com.skillsharing.infrastructure.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,7 @@ public class InvitacionService {
     private final SesionRepository sesionRepository;
     private final UsuarioRepository usuarioRepository;
     private final InscripcionService inscripcionService;
+    private final NotificacionRepository notificacionRepository;
 
     // hu06: invitar asistentes
     @Transactional
@@ -33,14 +37,30 @@ public class InvitacionService {
             throw new IllegalStateException("solo el organizador puede enviar invitaciones");
         }
 
+        if (sesion.getTipo() != TipoSesion.PRIVADA) {
+            throw new IllegalStateException("solo las sesiones privadas usan invitaciones");
+        }
+
+        if (sesion.getFechaSesion().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("no se puede invitar a una sesion que ya inicio");
+        }
+
         Usuario invitado = usuarioRepository.findById(invitadoId)
                 .orElseThrow(() -> new RuntimeException("invitado no encontrado"));
+
+        if (invitado.getUsuarioId().equals(organizadorId)) {
+            throw new IllegalStateException("no puedes invitarte a tu propia sesion");
+        }
 
         if (invitacionRepository.existsBySesionSesionIdAndInvitadoUsuarioId(sesionId, invitadoId)) {
             throw new IllegalStateException("el usuario ya ha sido invitado (RN11)");
         }
 
-        if (invitacionRepository.countBySesionSesionId(sesionId) >= 50) {
+        long invitacionesActivas = invitacionRepository.countBySesionSesionIdAndEstadoIn(
+                sesionId,
+                List.of(EstadoInvitacion.PENDIENTE, EstadoInvitacion.ACEPTADA)
+        );
+        if (invitacionesActivas >= 50) {
             throw new IllegalStateException("limite maximo de 50 invitaciones alcanzado (RN12)");
         }
 
@@ -51,7 +71,15 @@ public class InvitacionService {
                 .fechaEnvio(LocalDateTime.now())
                 .build();
                 
-        return invitacionRepository.save(inv);
+        Invitacion guardada = invitacionRepository.save(inv);
+
+        notificacionRepository.save(Notificacion.builder()
+                .usuario(invitado)
+                .sesion(sesion)
+                .mensaje("recibiste una invitacion para la sesion '" + sesion.getTitulo() + "'")
+                .build());
+
+        return guardada;
     }
 
     // hu28: visualizar invitaciones privadas
@@ -75,6 +103,10 @@ public class InvitacionService {
 
         if (inv.getFechaEnvio().plusDays(5).isBefore(LocalDateTime.now())) {
             throw new IllegalStateException("la invitacion ha expirado despues de 5 dias (RN17)");
+        }
+
+        if (inv.getSesion().getFechaSesion().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("la sesion ya inicio y no permite confirmar asistencia");
         }
 
         if (aceptar) {

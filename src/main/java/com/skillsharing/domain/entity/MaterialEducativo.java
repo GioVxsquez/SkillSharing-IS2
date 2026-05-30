@@ -26,6 +26,7 @@ public class MaterialEducativo {
     private String rutaArchivo;
 
     @Column(name = "tipo_archivo", length = 50)
+    @Builder.Default
     private String tipoArchivo = "PDF";
 
     // relacion con la sesion a la que pertenece este material
@@ -34,5 +35,6 @@ public class MaterialEducativo {
     private SesionAprendizaje sesion;
 
     @Column(name = "fecha_subida", nullable = false)
+    @Builder.Default
     private LocalDateTime fechaSubida = LocalDateTime.now();
 }

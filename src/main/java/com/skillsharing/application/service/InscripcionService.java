@@ -11,6 +11,7 @@ import com.skillsharing.infrastructure.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 
 // hu09: logica de inscripcion de usuarios a sesiones
@@ -36,8 +37,21 @@ public class InscripcionService {
             throw new IllegalStateException("solo puedes inscribirte a sesiones activas");
         }
 
+        if (sesion.getFechaSesion().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("la sesion ya inicio y no permite nuevas asistencias");
+        }
+
         if (sesion.getInstructor().getUsuarioId().equals(usuarioId)) {
             throw new IllegalStateException("el instructor no puede inscribirse a su propia sesion");
+        }
+
+        long asistenciasActivas = inscripcionRepository.countActivasByUsuario(
+                usuarioId,
+                List.of(EstadoSesion.ACTIVA, EstadoSesion.PENDIENTE),
+                LocalDateTime.now()
+        );
+        if (asistenciasActivas >= 5) {
+            throw new IllegalStateException("alcanzaste el limite de 5 sesiones activas confirmadas");
         }
 
         if (inscripcionRepository.existsBySesionSesionIdAndUsuarioUsuarioId(sesionId, usuarioId)) {
@@ -66,6 +80,10 @@ public class InscripcionService {
     }
 
     public List<Inscripcion> listarPorUsuario(Long usuarioId) {
-        return inscripcionRepository.findByUsuarioUsuarioId(usuarioId);
+        return inscripcionRepository.findVigentesByUsuario(usuarioId, LocalDateTime.now().minusDays(2));
+    }
+
+    public List<Inscripcion> listarInvitados(Long sesionId) {
+        return inscripcionRepository.findBySesionSesionId(sesionId);
     }
 }

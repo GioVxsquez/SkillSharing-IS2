@@ -19,4 +19,6 @@ public interface InvitacionRepository extends JpaRepository<Invitacion, Long> {
     
     // validacion (regla de negocio): limite maximo de invitaciones
     long countBySesionSesionId(Long sesionId);
+
+    long countBySesionSesionIdAndEstadoIn(Long sesionId, List<EstadoInvitacion> estados);
 }

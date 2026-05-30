@@ -2,6 +2,7 @@ package com.skillsharing.presentation.controller;
 
 import com.skillsharing.application.dto.request.SesionRequestDto;
 import com.skillsharing.application.dto.response.ApiResponse;
+import com.skillsharing.application.dto.response.ParticipanteResponseDto;
 import com.skillsharing.application.dto.response.SesionResponseDto;
 import com.skillsharing.application.service.BuscadorService;
 import com.skillsharing.application.service.InscripcionService;
@@ -92,6 +93,16 @@ public class SesionController {
 
         inscripcionService.inscribir(sesionId, usuario.getUsuarioId());
         return ResponseEntity.ok(ApiResponse.exito("asistencia publica confirmada", null));
+    }
+
+    // hu26: asistentes confirmados de una sesion
+    @GetMapping("/{sesionId}/invitados")
+    public ResponseEntity<ApiResponse<List<ParticipanteResponseDto>>> invitados(@PathVariable Long sesionId) {
+        List<ParticipanteResponseDto> lista = inscripcionService.listarInvitados(sesionId).stream()
+                .map(ParticipanteResponseDto::fromEntity)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(ApiResponse.exito("invitados confirmados", lista));
     }
 
     // hu28: buscar sesiones por habilidad o titulo usando el patron strategy

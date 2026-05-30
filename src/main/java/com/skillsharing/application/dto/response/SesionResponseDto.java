@@ -37,7 +37,7 @@ public class SesionResponseDto {
         dto.setDescripcion(s.getDescripcion());
         dto.setFechaSesion(s.getFechaSesion());
         dto.setModalidad(s.getModalidad().name());
-        dto.setTipo("PUBLICA");
+        dto.setTipo(s.getTipo().name());
         dto.setEstado(s.getEstado().name());
         dto.setMaxParticipantes(s.getMaxParticipantes());
         dto.setCapacidadMaxima(s.getMaxParticipantes());

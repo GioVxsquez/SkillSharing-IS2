@@ -33,5 +33,6 @@ public class VerificacionToken {
 
     // marca si el token ya fue utilizado para no permitir reuso
     @Column(nullable = false)
+    @Builder.Default
     private Boolean usado = false;
 }

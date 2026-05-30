@@ -28,8 +28,10 @@ public class Inscripcion {
 
     // rol del participante en la sesion (APRENDIZ por defecto)
     @Column(name = "rol_sesion", length = 20, nullable = false)
+    @Builder.Default
     private String rolSesion = "APRENDIZ";
 
     @Column(name = "fecha_inscripcion", nullable = false)
+    @Builder.Default
     private LocalDateTime fechaInscripcion = LocalDateTime.now();
 }
