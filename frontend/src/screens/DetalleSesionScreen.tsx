@@ -5,38 +5,43 @@ import {
 } from 'react-native';
 import { api } from '../api/config';
 
-// HU04: Ver detalle de un evento/sesión
-// HU17: Confirmar asistencia pública
+// HU04: ver detalle de una sesion
+// HU17: confirmar asistencia publica
+// HU26: visualizar invitados confirmados
 export default function DetalleSesionScreen({ route, navigation }: any) {
   const { sesionId } = route.params;
-  const [sesion, setSesion]         = useState<any>(null);
-  const [loading, setLoading]       = useState(true);
+  const [sesion, setSesion] = useState<any>(null);
+  const [invitados, setInvitados] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [inscribiendo, setInscribiendo] = useState(false);
 
   useEffect(() => {
     const cargar = async () => {
       try {
-        const resp = await api.get(`/sesiones/${sesionId}`);
-        setSesion(resp.data.data);
+        const [respSesion, respInvitados] = await Promise.all([
+          api.get(`/sesiones/${sesionId}`),
+          api.get(`/sesiones/${sesionId}/invitados`),
+        ]);
+        setSesion(respSesion.data.data);
+        setInvitados(respInvitados.data.data || []);
       } catch {
-        Alert.alert('Error', 'No se pudo cargar la sesión.');
+        Alert.alert('Error', 'No se pudo cargar la sesion.');
         navigation.goBack();
       } finally {
         setLoading(false);
       }
     };
     cargar();
-  }, [sesionId]);
+  }, [sesionId, navigation]);
 
-  // HU17: confirmar asistencia a sesión pública
   const handleInscribirse = async () => {
     setInscribiendo(true);
     try {
       const resp = await api.post(`/sesiones/${sesionId}/inscribirse`);
       if (resp.data.ok) {
-        Alert.alert('¡Listo!', 'Te has inscrito exitosamente en esta sesión.');
+        Alert.alert('Listo', 'Te has inscrito exitosamente en esta sesion.');
       } else {
-        Alert.alert('Aviso', resp.data.mensaje || 'No se pudo completar la inscripción.');
+        Alert.alert('Aviso', resp.data.mensaje || 'No se pudo completar la inscripcion.');
       }
     } catch (error: any) {
       Alert.alert('Error', error.response?.data?.mensaje || 'Error al inscribirse.');
@@ -52,20 +57,18 @@ export default function DetalleSesionScreen({ route, navigation }: any) {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#1B3A6B" />
 
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backTexto}>← Volver</Text>
+          <Text style={styles.backTexto}>Volver</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitulo}>Detalle de Sesión</Text>
+        <Text style={styles.headerTitulo}>Detalle de Sesion</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
-        {/* Tarjeta principal */}
         <View style={styles.card}>
           <View style={styles.cardTop}>
             <View style={[styles.badge, sesion.tipo === 'PUBLICA' ? styles.badgePublica : styles.badgePrivada]}>
-              <Text style={styles.badgeTexto}>{sesion.tipo === 'PUBLICA' ? '🌐 Pública' : '🔒 Privada'}</Text>
+              <Text style={styles.badgeTexto}>{sesion.tipo === 'PUBLICA' ? 'Publica' : 'Privada'}</Text>
             </View>
             <View style={[styles.badge, styles.badgeEstado]}>
               <Text style={styles.badgeTexto}>{sesion.estado}</Text>
@@ -75,37 +78,55 @@ export default function DetalleSesionScreen({ route, navigation }: any) {
           <Text style={styles.titulo}>{sesion.titulo}</Text>
 
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>👤 Instructor</Text>
-            <Text style={styles.infoValor}>{sesion.instructorNombre || '—'}</Text>
+            <Text style={styles.infoLabel}>Instructor</Text>
+            <Text style={styles.infoValor}>{sesion.instructorNombre || '-'}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>📅 Fecha</Text>
+            <Text style={styles.infoLabel}>Fecha</Text>
             <Text style={styles.infoValor}>
               {sesion.fechaSesion ? new Date(sesion.fechaSesion).toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'Por confirmar'}
             </Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>⏱ Duración</Text>
-            <Text style={styles.infoValor}>{sesion.duracionMinutos ? `${sesion.duracionMinutos} minutos` : '—'}</Text>
+            <Text style={styles.infoLabel}>Duracion</Text>
+            <Text style={styles.infoValor}>{sesion.duracionMinutos ? `${sesion.duracionMinutos} minutos` : '-'}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>📍 Ubicación</Text>
+            <Text style={styles.infoLabel}>Ubicacion</Text>
             <Text style={styles.infoValor}>{sesion.ubicacion || 'Virtual'}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>👥 Capacidad</Text>
-            <Text style={styles.infoValor}>{sesion.capacidadMaxima ? `Máx. ${sesion.capacidadMaxima} personas` : 'Sin límite'}</Text>
+            <Text style={styles.infoLabel}>Capacidad</Text>
+            <Text style={styles.infoValor}>{sesion.capacidadMaxima ? `Max. ${sesion.capacidadMaxima} personas` : 'Sin limite'}</Text>
           </View>
 
           {sesion.descripcion ? (
             <View style={styles.descripcionContainer}>
-              <Text style={styles.infoLabel}>📝 Descripción</Text>
+              <Text style={styles.infoLabel}>Descripcion</Text>
               <Text style={styles.descripcion}>{sesion.descripcion}</Text>
             </View>
           ) : null}
         </View>
 
-        {/* Botón inscribirse (solo sesiones públicas activas) */}
+        <View style={styles.card}>
+          <Text style={styles.seccionTitulo}>Invitados confirmados</Text>
+          {invitados.length === 0 ? (
+            <Text style={styles.vacioInline}>Aun no hay invitados confirmados para esta sesion.</Text>
+          ) : (
+            invitados.map((item) => (
+              <View key={String(item.usuarioId)} style={styles.invitadoRow}>
+                <View style={styles.avatarMini}>
+                  <Text style={styles.avatarMiniTexto}>{item.nombre?.charAt(0)?.toUpperCase() || '?'}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.invitadoNombre}>{item.nombre}</Text>
+                  <Text style={styles.invitadoRol}>{item.rolSesion}</Text>
+                </View>
+              </View>
+            ))
+          )}
+        </View>
+
         {sesion.tipo === 'PUBLICA' && sesion.estado === 'ACTIVA' && (
           <TouchableOpacity
             style={[styles.boton, inscribiendo && { opacity: 0.7 }]}
@@ -114,20 +135,16 @@ export default function DetalleSesionScreen({ route, navigation }: any) {
           >
             {inscribiendo
               ? <ActivityIndicator color="#fff" />
-              : <Text style={styles.botonTexto}>✅ Confirmar Asistencia</Text>}
+              : <Text style={styles.botonTexto}>Confirmar Asistencia</Text>}
           </TouchableOpacity>
         )}
 
-        {/* Botón invitar (solo para sesiones privadas del instructor) */}
-        {/* Como no tenemos el ID del usuario en contexto global facilmente, 
-            asumimos que si es privada, damos la opción de invitar. 
-            En una app real, verificaríamos que sesion.instructorId === miUsuarioId */}
         {sesion.tipo === 'PRIVADA' && (
           <TouchableOpacity
             style={[styles.boton, { backgroundColor: '#FFFFFF', borderWidth: 2, borderColor: '#1B3A6B' }]}
             onPress={() => navigation.navigate('InvitarAsistentes', { sesionId: sesion.sesionId, sesionTitulo: sesion.titulo })}
           >
-            <Text style={[styles.botonTexto, { color: '#1B3A6B' }]}>✉️ Invitar Asistentes</Text>
+            <Text style={[styles.botonTexto, { color: '#1B3A6B' }]}>Invitar Asistentes</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -155,6 +172,13 @@ const styles = StyleSheet.create({
   infoValor: { fontSize: 13, color: '#2D3748', fontWeight: '500', textAlign: 'right', flex: 1, marginLeft: 16 },
   descripcionContainer: { marginTop: 14 },
   descripcion: { fontSize: 14, color: '#4A5568', lineHeight: 22, marginTop: 6 },
-  boton: { backgroundColor: '#1B3A6B', paddingVertical: 16, borderRadius: 12, alignItems: 'center', shadowColor: '#1B3A6B', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 8, elevation: 5 },
+  seccionTitulo: { fontSize: 16, fontWeight: '800', color: '#1B3A6B', marginBottom: 12 },
+  vacioInline: { fontSize: 13, color: '#718096', lineHeight: 20 },
+  invitadoRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#F0F4F8' },
+  avatarMini: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#1B3A6B', justifyContent: 'center', alignItems: 'center', marginRight: 10 },
+  avatarMiniTexto: { color: '#FFD700', fontWeight: '800' },
+  invitadoNombre: { fontSize: 14, fontWeight: '700', color: '#1A202C' },
+  invitadoRol: { fontSize: 12, color: '#718096', marginTop: 2 },
+  boton: { backgroundColor: '#1B3A6B', paddingVertical: 16, borderRadius: 12, alignItems: 'center', shadowColor: '#1B3A6B', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 8, elevation: 5, marginBottom: 12 },
   botonTexto: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
 });

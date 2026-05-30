@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { api } from '../api/config';
 
-// HU01: Crear una sesión/evento como instructor
+// HU01: crear una sesion como instructor
 export default function CrearSesionScreen({ navigation }: any) {
   const [titulo, setTitulo]           = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -18,7 +18,7 @@ export default function CrearSesionScreen({ navigation }: any) {
 
   const handleCrear = async () => {
     if (!titulo.trim()) {
-      Alert.alert('Campo requerido', 'El título de la sesión es obligatorio.');
+      Alert.alert('Campo requerido', 'El titulo de la sesion es obligatorio.');
       return;
     }
 
@@ -34,20 +34,24 @@ export default function CrearSesionScreen({ navigation }: any) {
         fechaSesion: fechaBase,
         modalidad: ubicacion.trim().toLowerCase().includes('aula') ? 'PRESENCIAL' : 'VIRTUAL',
         maxParticipantes: capacidad ? parseInt(capacidad, 10) : 20,
+        tipo: esPrivada ? 'PRIVADA' : 'PUBLICA',
+        privada: esPrivada,
         linkSesion: ubicacion.trim(),
         lugar: ubicacion.trim(),
       };
 
       const resp = await api.post('/sesiones', payload);
       if (resp.data.ok) {
-        Alert.alert('¡Sesión creada!', 'Tu sesión ha sido publicada exitosamente.',
+        Alert.alert(
+          'Sesion creada',
+          'Tu sesion fue creada y queda pendiente de aprobacion.',
           [{ text: 'OK', onPress: () => navigation.goBack() }]
         );
       } else {
-        Alert.alert('Error', resp.data.mensaje || 'No se pudo crear la sesión.');
+        Alert.alert('Error', resp.data.mensaje || 'No se pudo crear la sesion.');
       }
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.mensaje || 'Error al crear la sesión.');
+      Alert.alert('Error', error.response?.data?.mensaje || 'Error al crear la sesion.');
     } finally {
       setLoading(false);
     }
@@ -58,57 +62,99 @@ export default function CrearSesionScreen({ navigation }: any) {
       <StatusBar barStyle="light-content" backgroundColor="#1B3A6B" />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backTexto}>← Cancelar</Text>
+          <Text style={styles.backTexto}>Cancelar</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitulo}>Nueva Sesión</Text>
+        <Text style={styles.headerTitulo}>Nueva Sesion</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-
         <View style={styles.campo}>
-          <Text style={styles.label}>Título *</Text>
-          <TextInput style={styles.input} placeholder="Ej: Python para principiantes" placeholderTextColor="#B0B8C1" value={titulo} onChangeText={setTitulo} />
+          <Text style={styles.label}>Titulo *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ej: Python para principiantes"
+            placeholderTextColor="#B0B8C1"
+            value={titulo}
+            onChangeText={setTitulo}
+          />
         </View>
 
         <View style={styles.campo}>
-          <Text style={styles.label}>Descripción</Text>
-          <TextInput style={[styles.input, styles.textArea]} placeholder="Describe de qué trata la sesión..." placeholderTextColor="#B0B8C1" value={descripcion} onChangeText={setDescripcion} multiline numberOfLines={4} />
+          <Text style={styles.label}>Descripcion</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Describe de que trata la sesion..."
+            placeholderTextColor="#B0B8C1"
+            value={descripcion}
+            onChangeText={setDescripcion}
+            multiline
+            numberOfLines={4}
+          />
         </View>
 
         <View style={styles.campo}>
-          <Text style={styles.label}>Ubicación / Enlace</Text>
-          <TextInput style={styles.input} placeholder="Ej: Aula 302 o meet.google.com/..." placeholderTextColor="#B0B8C1" value={ubicacion} onChangeText={setUbicacion} />
+          <Text style={styles.label}>Ubicacion / Enlace</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ej: Aula 302 o meet.google.com/..."
+            placeholderTextColor="#B0B8C1"
+            value={ubicacion}
+            onChangeText={setUbicacion}
+          />
         </View>
 
         <View style={styles.row}>
           <View style={[styles.campo, { flex: 1, marginRight: 8 }]}>
-            <Text style={styles.label}>Duración (min)</Text>
-            <TextInput style={styles.input} placeholder="60" placeholderTextColor="#B0B8C1" value={duracion} onChangeText={setDuracion} keyboardType="number-pad" />
+            <Text style={styles.label}>Duracion (min)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="60"
+              placeholderTextColor="#B0B8C1"
+              value={duracion}
+              onChangeText={setDuracion}
+              keyboardType="number-pad"
+            />
           </View>
           <View style={[styles.campo, { flex: 1 }]}>
-            <Text style={styles.label}>Capacidad máx.</Text>
-            <TextInput style={styles.input} placeholder="20" placeholderTextColor="#B0B8C1" value={capacidad} onChangeText={setCapacidad} keyboardType="number-pad" />
+            <Text style={styles.label}>Capacidad max.</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="20"
+              placeholderTextColor="#B0B8C1"
+              value={capacidad}
+              onChangeText={setCapacidad}
+              keyboardType="number-pad"
+            />
           </View>
         </View>
 
         <View style={styles.campo}>
           <Text style={styles.label}>Fecha (AAAA-MM-DD)</Text>
-          <TextInput style={styles.input} placeholder="2026-06-15" placeholderTextColor="#B0B8C1" value={fechaSesion} onChangeText={setFecha} />
+          <TextInput
+            style={styles.input}
+            placeholder="2026-06-15"
+            placeholderTextColor="#B0B8C1"
+            value={fechaSesion}
+            onChangeText={setFecha}
+          />
         </View>
 
-        {/* Toggle tipo */}
         <View style={styles.toggleRow}>
           <View>
-            <Text style={styles.label}>Sesión Privada 🔒</Text>
-            <Text style={styles.toggleHint}>Requerirá invitación para unirse</Text>
+            <Text style={styles.label}>Sesion privada</Text>
+            <Text style={styles.toggleHint}>Requiere invitacion para unirse</Text>
           </View>
-          <Switch value={esPrivada} onValueChange={setEsPrivada} trackColor={{ false: '#CBD5E0', true: '#1B3A6B' }} thumbColor="#FFFFFF" />
+          <Switch
+            value={esPrivada}
+            onValueChange={setEsPrivada}
+            trackColor={{ false: '#CBD5E0', true: '#1B3A6B' }}
+            thumbColor="#FFFFFF"
+          />
         </View>
 
         <TouchableOpacity style={[styles.boton, loading && { opacity: 0.7 }]} onPress={handleCrear} disabled={loading}>
-          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.botonTexto}>Crear Sesión</Text>}
+          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.botonTexto}>Crear Sesion</Text>}
         </TouchableOpacity>
-
       </ScrollView>
     </View>
   );
