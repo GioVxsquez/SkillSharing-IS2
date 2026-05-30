@@ -15,10 +15,14 @@ public class SesionResponseDto {
     private String descripcion;
     private LocalDateTime fechaSesion;
     private String modalidad;
+    private String tipo;
     private String estado;
     private Integer maxParticipantes;
+    private Integer capacidadMaxima;
+    private Integer duracionMinutos;
     private String linkSesion;
     private String lugar;
+    private String ubicacion;
     private Long instructorId;
     private String instructorNombre;
     private String habilidadRequerida;
@@ -33,10 +37,14 @@ public class SesionResponseDto {
         dto.setDescripcion(s.getDescripcion());
         dto.setFechaSesion(s.getFechaSesion());
         dto.setModalidad(s.getModalidad().name());
+        dto.setTipo("PUBLICA");
         dto.setEstado(s.getEstado().name());
         dto.setMaxParticipantes(s.getMaxParticipantes());
+        dto.setCapacidadMaxima(s.getMaxParticipantes());
+        dto.setDuracionMinutos(60);
         dto.setLinkSesion(s.getLinkSesion());
         dto.setLugar(s.getLugar());
+        dto.setUbicacion(s.getLugar() != null ? s.getLugar() : s.getLinkSesion());
         dto.setMaterialCargado(s.getMaterialCargado());
         dto.setFechaCreacion(s.getFechaCreacion());
         if (s.getInstructor() != null) {

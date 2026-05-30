@@ -17,14 +17,20 @@ export default function PerfilScreen({ navigation }: any) {
 
   const cargar = useCallback(async () => {
     try {
-      const [rPerfil, rHabs, rMisHabs] = await Promise.all([
+      const [rPerfil, rHabs] = await Promise.all([
         api.get('/usuarios/me'),
         api.get('/habilidades'),
-        api.get('/usuarios/me'),
       ]);
       setPerfil(rPerfil.data.data);
-      setHabilidades(rHabs.data.data || []);
-      setMisH((rPerfil.data.data?.habilidades || []).map((h: any) => h.habilidadId));
+      const disponibles = rHabs.data.data || [];
+      const delPerfil = rPerfil.data.data?.habilidades || [];
+      setHabilidades(disponibles);
+      setMisH(delPerfil
+        .map((h: any) => {
+          if (typeof h === 'object') return h.habilidadId;
+          return disponibles.find((hab: any) => hab.nombre === h)?.habilidadId;
+        })
+        .filter(Boolean));
     } catch {
       Alert.alert('Error', 'No se pudo cargar el perfil.');
     } finally {
@@ -43,7 +49,7 @@ export default function PerfilScreen({ navigation }: any) {
     setGuardando(true);
     try {
       const resp = await api.put('/usuarios/me/habilidades', { habilidadIds: misHabilidades });
-      if (resp.data.exito) {
+      if (resp.data.ok) {
         Alert.alert('¡Guardado!', 'Tus habilidades han sido actualizadas.');
       }
     } catch {

@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -31,15 +32,32 @@ public class UsuarioController {
     // hu22: el usuario actualiza las habilidades de su perfil
     @PutMapping("/me/habilidades")
     public ResponseEntity<ApiResponse<UsuarioResponseDto>> actualizarHabilidades(
-            @RequestBody List<Long> habilidadesIds,
+            @RequestBody Object payload,
             Authentication auth) {
             
         Usuario usuario = usuarioRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("usuario no encontrado"));
 
+        List<Long> habilidadesIds = extraerHabilidades(payload);
         Usuario actualizado = usuarioService.actualizarHabilidades(usuario.getUsuarioId(), habilidadesIds);
         
         return ResponseEntity.ok(ApiResponse.exito("habilidades actualizadas", UsuarioResponseDto.fromEntity(actualizado)));
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Long> extraerHabilidades(Object payload) {
+        Object valor = payload;
+        if (payload instanceof Map<?, ?> mapa) {
+            valor = mapa.get("habilidadIds");
+        }
+
+        if (valor instanceof List<?> lista) {
+            return lista.stream()
+                    .map(item -> item instanceof Number numero ? numero.longValue() : Long.valueOf(item.toString()))
+                    .toList();
+        }
+
+        throw new IllegalArgumentException("formato de habilidades invalido");
     }
 
     // hu06: buscar usuarios para invitarlos a sesiones privadas

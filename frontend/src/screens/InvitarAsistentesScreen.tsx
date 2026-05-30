@@ -33,7 +33,7 @@ export default function InvitarAsistentesScreen({ route, navigation }: any) {
         sesionId,
         receptorId: usuarioId,
       });
-      if (resp.data.exito) {
+      if (resp.data.ok) {
         Alert.alert('✅ Invitación enviada', `Se invitó a ${nombre} a la sesión.`);
       } else {
         Alert.alert('Aviso', resp.data.mensaje || 'No se pudo enviar la invitación.');

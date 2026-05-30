@@ -33,7 +33,7 @@ export default function DetalleSesionScreen({ route, navigation }: any) {
     setInscribiendo(true);
     try {
       const resp = await api.post(`/sesiones/${sesionId}/inscribirse`);
-      if (resp.data.exito) {
+      if (resp.data.ok) {
         Alert.alert('¡Listo!', 'Te has inscrito exitosamente en esta sesión.');
       } else {
         Alert.alert('Aviso', resp.data.mensaje || 'No se pudo completar la inscripción.');

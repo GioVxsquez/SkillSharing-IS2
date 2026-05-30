@@ -31,6 +31,14 @@ target/
 *.log
 logs/
 
+# archivos temporales de trabajo local
+.docx_extract*/
+node_modules/
+/package.json
+/package-lock.json
+/deleteUser.js
+/testSmtp.js
+
 # archivos subidos por usuarios (hu05 - materiales educativos)
 uploads/
 *.pdf

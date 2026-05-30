@@ -24,18 +24,22 @@ export default function CrearSesionScreen({ navigation }: any) {
 
     setLoading(true);
     try {
+      const fechaBase = fechaSesion
+        ? new Date(`${fechaSesion}T18:00:00`).toISOString()
+        : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
       const payload = {
         titulo: titulo.trim(),
         descripcion: descripcion.trim(),
-        ubicacion: ubicacion.trim(),
-        duracionMinutos: duracion ? parseInt(duracion) : null,
-        capacidadMaxima: capacidad ? parseInt(capacidad) : null,
-        fechaSesion: fechaSesion ? new Date(fechaSesion).toISOString() : null,
-        tipo: esPrivada ? 'PRIVADA' : 'PUBLICA',
+        fechaSesion: fechaBase,
+        modalidad: ubicacion.trim().toLowerCase().includes('aula') ? 'PRESENCIAL' : 'VIRTUAL',
+        maxParticipantes: capacidad ? parseInt(capacidad, 10) : 20,
+        linkSesion: ubicacion.trim(),
+        lugar: ubicacion.trim(),
       };
 
       const resp = await api.post('/sesiones', payload);
-      if (resp.data.exito) {
+      if (resp.data.ok) {
         Alert.alert('¡Sesión creada!', 'Tu sesión ha sido publicada exitosamente.',
           [{ text: 'OK', onPress: () => navigation.goBack() }]
         );

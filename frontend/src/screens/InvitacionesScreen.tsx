@@ -32,7 +32,7 @@ export default function InvitacionesScreen({ navigation }: any) {
     setProcesando(invitacionId);
     try {
       const resp = await api.put(`/invitaciones/${invitacionId}/responder?aceptar=${aceptar}`);
-      if (resp.data.exito) {
+      if (resp.data.ok) {
         Alert.alert('¡Listo!', aceptar ? 'Invitación aceptada.' : 'Invitación rechazada.');
         cargar();
       }

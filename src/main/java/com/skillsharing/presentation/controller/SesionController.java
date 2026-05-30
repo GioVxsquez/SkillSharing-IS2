@@ -4,7 +4,9 @@ import com.skillsharing.application.dto.request.SesionRequestDto;
 import com.skillsharing.application.dto.response.ApiResponse;
 import com.skillsharing.application.dto.response.SesionResponseDto;
 import com.skillsharing.application.service.BuscadorService;
+import com.skillsharing.application.service.InscripcionService;
 import com.skillsharing.application.service.SesionService;
+import com.skillsharing.domain.entity.Inscripcion;
 import com.skillsharing.domain.entity.SesionAprendizaje;
 import com.skillsharing.domain.entity.Usuario;
 import com.skillsharing.infrastructure.repository.UsuarioRepository;
@@ -25,6 +27,7 @@ public class SesionController {
 
     private final SesionService sesionService;
     private final BuscadorService buscadorService;
+    private final InscripcionService inscripcionService;
     private final UsuarioRepository usuarioRepository;
 
     // hu06: crear sesion (solo instructores)
@@ -57,6 +60,38 @@ public class SesionController {
     @GetMapping("/publicas")
     public ResponseEntity<ApiResponse<List<SesionResponseDto>>> listarPublicas() {
         return listarActivas();
+    }
+
+    // hu02: alias usado por la pantalla mis sesiones
+    @GetMapping("/mis-sesiones")
+    public ResponseEntity<ApiResponse<List<SesionResponseDto>>> misSesiones(Authentication auth) {
+        return misEventos(auth);
+    }
+
+    // hu10: sesiones donde participa el usuario autenticado
+    @GetMapping("/mis-inscripciones")
+    public ResponseEntity<ApiResponse<List<SesionResponseDto>>> misInscripciones(Authentication auth) {
+        Usuario usuario = usuarioRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("usuario no encontrado"));
+
+        List<SesionResponseDto> lista = inscripcionService.listarPorUsuario(usuario.getUsuarioId()).stream()
+                .map(Inscripcion::getSesion)
+                .map(SesionResponseDto::fromEntity)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(ApiResponse.exito("sesiones a las que asisto", lista));
+    }
+
+    // hu17: alias usado por detalle de sesion para confirmar asistencia publica
+    @PostMapping("/{sesionId}/inscribirse")
+    public ResponseEntity<ApiResponse<String>> inscribirse(
+            @PathVariable Long sesionId,
+            Authentication auth) {
+        Usuario usuario = usuarioRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("usuario no encontrado"));
+
+        inscripcionService.inscribir(sesionId, usuario.getUsuarioId());
+        return ResponseEntity.ok(ApiResponse.exito("asistencia publica confirmada", null));
     }
 
     // hu28: buscar sesiones por habilidad o titulo usando el patron strategy
