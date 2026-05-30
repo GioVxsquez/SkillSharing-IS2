@@ -15,19 +15,33 @@ export default function MisSesionesScreen({ navigation }: any) {
   const [refreshing, setRefreshing]      = useState(false);
 
   const cargar = useCallback(async () => {
+    let huboError = false;
     try {
-      const [r1, r2] = await Promise.all([
-        api.get('/sesiones/mis-sesiones'),
-        api.get('/sesiones/mis-inscripciones'),
-      ]);
-      setMisSesiones(r1.data.data || []);
-      setAsistencias(r2.data.data || []);
-    } catch {
-      Alert.alert('Error', 'No se pudieron cargar tus sesiones.');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+      const gestionadas = await api.get('/sesiones/mis-sesiones');
+      setMisSesiones(gestionadas.data.data || []);
+    } catch (error: any) {
+      setMisSesiones([]);
+      if (error.response?.status !== 403) {
+        huboError = true;
+      }
     }
+
+    try {
+      const asistencias = await api.get('/inscripciones/mis-asistencias');
+      setAsistencias(asistencias.data.data || []);
+    } catch (error: any) {
+      setAsistencias([]);
+      if (error.response?.status !== 403) {
+        huboError = true;
+      }
+    }
+
+    if (huboError) {
+      Alert.alert('Error', 'No se pudieron cargar tus sesiones.');
+    }
+
+    setLoading(false);
+    setRefreshing(false);
   }, []);
 
   useEffect(() => { cargar(); }, [cargar]);
