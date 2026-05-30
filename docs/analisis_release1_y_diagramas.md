@@ -36,7 +36,7 @@ Segun la tabla del Sprint Planning 1 del PDF, el Release 1 incluye:
 | UH06 | `InvitarAsistentesScreen` | cubierto | Busca usuarios y envia invitacion a sesiones privadas |
 | UH07 | `InvitacionesScreen` | cubierto | Permite aceptar o rechazar invitaciones |
 | UH10 | `MisSesionesScreen` | cubierto | Tab `Que asisto` consume `/sesiones/mis-inscripciones` |
-| UH14 | `RegisterScreen` | cubierto para demo | Registra usuario activo directamente por bloqueo SMTP de Render |
+| UH14 | `RegisterScreen` | cubierto | Registra usuario inactivo y muestra mensaje para revisar correo |
 | UH15 | `LoginScreen` | cubierto | Guarda JWT en AsyncStorage |
 | UH16 | `HomeScreen` | cubierto | Lista sesiones publicas activas |
 | UH17 | `DetalleSesionScreen` | cubierto | Boton confirmar asistencia para sesiones publicas activas |
@@ -44,11 +44,11 @@ Segun la tabla del Sprint Planning 1 del PDF, el Release 1 incluye:
 | UH24 | `HomeScreen` | cubierto | Boton salir elimina token local |
 | UH26 | `DetalleSesionScreen` | cubierto | Muestra invitados confirmados desde `/sesiones/{id}/invitados` |
 | UH28 | `InvitacionesScreen` | cubierto | Lista invitaciones privadas pendientes |
-| UH29 | sin pantalla interna | parcial | El backend conserva `/api/auth/verificar`, pero la app no usa correo real por bloqueo SMTP |
+| UH29 | correo externo + navegador | cubierto | El backend envia enlace por SMTP2GO y activa la cuenta con `/api/auth/verificar` |
 
 ## faltantes o riesgos para hablar con el grupo
 
-1. `UH29` no funciona como flujo real de correo en Render gratis. El backend tiene endpoint de verificacion, pero el registro activa directo para la demo.
+1. `UH29` depende de SMTP2GO y de las variables de entorno `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `APP_EMAIL_FROM` y `APP_BASE_URL` en Render.
 2. El PDF original no exige `HU05` en Release 1, pero la adaptacion SkillSharing pide material educativo obligatorio para aprobar sesiones. Backend existe; falta pantalla movil para subir PDF.
 3. Las sesiones creadas quedan `PENDIENTE`; para que aparezcan en Home deben aprobarse con endpoint admin. No hay pantalla movil admin.
 4. `HU28` tiene doble interpretacion: en el PDF es invitaciones privadas, pero en la adaptacion del proyecto tambien se uso como buscador por habilidad. El codigo soporta ambas, pero el informe debe aclarar esta decision.
@@ -586,6 +586,8 @@ participant "RegisterScreen" as app
 participant "AuthController" as ctrl
 participant "UsuarioRepository" as repo
 participant "PasswordEncoder" as encoder
+participant "VerificacionTokenRepository" as tokenRepo
+participant "EmailService" as email
 database "Supabase" as db
 
 Usuario -> app : completa registro
@@ -596,9 +598,13 @@ alt correo existente
   ctrl --> app : ok=false
 else correo nuevo
   ctrl -> encoder : encode(password)
-  ctrl -> repo : save(usuario activo)
+  ctrl -> repo : save(usuario inactivo)
   repo -> db : insert usuario
-  ctrl --> app : ok=true
+  ctrl -> tokenRepo : save(token de verificacion)
+  tokenRepo -> db : insert verificacion_token
+  ctrl -> email : enviarCorreoVerificacion(email, token)
+  email --> Usuario : correo con enlace
+  ctrl --> app : ok=true, revisar correo
 end
 @enduml
 ```

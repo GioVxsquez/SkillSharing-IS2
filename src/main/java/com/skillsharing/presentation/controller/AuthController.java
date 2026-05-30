@@ -3,6 +3,7 @@ package com.skillsharing.presentation.controller;
 import com.skillsharing.application.dto.request.LoginDto;
 import com.skillsharing.application.dto.request.UsuarioRegistroDto;
 import com.skillsharing.application.dto.response.ApiResponse;
+import com.skillsharing.application.service.EmailService;
 import com.skillsharing.domain.entity.Usuario;
 import com.skillsharing.domain.entity.VerificacionToken;
 import com.skillsharing.domain.enums.RolUsuario;
@@ -11,6 +12,7 @@ import com.skillsharing.infrastructure.repository.VerificacionTokenRepository;
 import com.skillsharing.infrastructure.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -26,8 +28,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.UUID;
 
 // controlador de autenticacion: registro, login y verificacion
 // HU14 - registrarse
@@ -44,8 +48,15 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final VerificacionTokenRepository tokenRepository;
+    private final EmailService emailService;
 
-    // HU14: registrarse - crea la cuenta activa para la demo del release 1
+    @Value("${app.email.verification-enabled:true}")
+    private boolean verificacionCorreoActiva;
+
+    @Value("${app.verification.token.expiry-ms:1800000}")
+    private long tokenExpiryMs;
+
+    // HU14: registrarse - crea la cuenta y prepara la verificacion por correo
     @PostMapping("/registro")
     public ResponseEntity<ApiResponse<String>> registro(@RequestBody UsuarioRegistroDto dto) {
         if (usuarioRepository.existsByEmail(dto.getEmail())) {
@@ -62,11 +73,26 @@ public class AuthController {
                 .email(dto.getEmail())
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .rol(rol)
-                .activo(true)
+                .activo(!verificacionCorreoActiva)
                 .fechaRegistro(LocalDateTime.now())
                 .build();
 
-        usuarioRepository.save(usuario);
+        Usuario usuarioGuardado = usuarioRepository.save(usuario);
+
+        if (verificacionCorreoActiva) {
+            String token = UUID.randomUUID().toString();
+            VerificacionToken verificacionToken = VerificacionToken.builder()
+                    .token(token)
+                    .usuario(usuarioGuardado)
+                    .fechaExpira(LocalDateTime.now().plus(Duration.ofMillis(tokenExpiryMs)))
+                    .usado(false)
+                    .build();
+            tokenRepository.save(verificacionToken);
+            emailService.enviarCorreoVerificacion(usuarioGuardado.getEmail(), usuarioGuardado.getNombre(), token);
+
+            return ResponseEntity.ok(new ApiResponse<>(true,
+                    "Registro exitoso. Revisa tu correo para activar la cuenta.", null));
+        }
 
         return ResponseEntity.ok(new ApiResponse<>(true,
                 "Registro exitoso. Ya puedes iniciar sesion.", null));
@@ -86,7 +112,7 @@ public class AuthController {
 
         } catch (DisabledException e) {
             return ResponseEntity.status(403).body(new ApiResponse<>(false,
-                    "Tu cuenta no esta activa. Contacta al administrador.", null));
+                    "Tu cuenta no esta activa. Revisa el correo de verificacion.", null));
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(401).body(new ApiResponse<>(false,
                     "Credenciales incorrectas. Verifica tu email y contrasena.", null));

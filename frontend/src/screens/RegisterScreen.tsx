@@ -40,7 +40,7 @@ export default function RegisterScreen({ navigation }: any) {
       if (response.data.ok) {
         Alert.alert(
           'Registro exitoso',
-          'Ya puedes iniciar sesion con tu cuenta.',
+          response.data.mensaje || 'Revisa tu correo para activar la cuenta.',
           [{ text: 'Entendido', onPress: () => navigation.navigate('Login') }]
         );
       } else {
