@@ -4,14 +4,15 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import LoginScreen         from '../screens/LoginScreen';
-import RegisterScreen      from '../screens/RegisterScreen';
-import HomeScreen          from '../screens/HomeScreen';
-import DetalleSesionScreen from '../screens/DetalleSesionScreen';
-import MisSesionesScreen   from '../screens/MisSesionesScreen';
-import CrearSesionScreen   from '../screens/CrearSesionScreen';
-import InvitacionesScreen  from '../screens/InvitacionesScreen';
-import PerfilScreen        from '../screens/PerfilScreen';
+import LoginScreen              from '../screens/LoginScreen';
+import RegisterScreen           from '../screens/RegisterScreen';
+import HomeScreen               from '../screens/HomeScreen';
+import DetalleSesionScreen      from '../screens/DetalleSesionScreen';
+import MisSesionesScreen        from '../screens/MisSesionesScreen';
+import CrearSesionScreen        from '../screens/CrearSesionScreen';
+import InvitacionesScreen       from '../screens/InvitacionesScreen';
+import PerfilScreen             from '../screens/PerfilScreen';
+import InvitarAsistentesScreen  from '../screens/InvitarAsistentesScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -50,8 +51,9 @@ export default function AppNavigator() {
         <Stack.Screen name="DetalleSesion" component={DetalleSesionScreen} />
         <Stack.Screen name="MisSesiones"   component={MisSesionesScreen} />
         <Stack.Screen name="CrearSesion"   component={CrearSesionScreen} />
-        <Stack.Screen name="Invitaciones"  component={InvitacionesScreen} />
-        <Stack.Screen name="Perfil"        component={PerfilScreen} />
+        <Stack.Screen name="Invitaciones"       component={InvitacionesScreen} />
+        <Stack.Screen name="InvitarAsistentes"  component={InvitarAsistentesScreen} />
+        <Stack.Screen name="Perfil"             component={PerfilScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

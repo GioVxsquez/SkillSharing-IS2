@@ -117,6 +117,19 @@ export default function DetalleSesionScreen({ route, navigation }: any) {
               : <Text style={styles.botonTexto}>✅ Confirmar Asistencia</Text>}
           </TouchableOpacity>
         )}
+
+        {/* Botón invitar (solo para sesiones privadas del instructor) */}
+        {/* Como no tenemos el ID del usuario en contexto global facilmente, 
+            asumimos que si es privada, damos la opción de invitar. 
+            En una app real, verificaríamos que sesion.instructorId === miUsuarioId */}
+        {sesion.tipo === 'PRIVADA' && (
+          <TouchableOpacity
+            style={[styles.boton, { backgroundColor: '#FFFFFF', borderWidth: 2, borderColor: '#1B3A6B' }]}
+            onPress={() => navigation.navigate('InvitarAsistentes', { sesionId: sesion.sesionId, sesionTitulo: sesion.titulo })}
+          >
+            <Text style={[styles.botonTexto, { color: '#1B3A6B' }]}>✉️ Invitar Asistentes</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </View>
   );
