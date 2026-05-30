@@ -536,7 +536,7 @@ participant "PasswordEncoder" as encoder
 participant "VerificacionTokenRepository" as tokenRepo
 participant "EmailService" as email
 database "Supabase" as db
-cloud "SMTP2GO" as smtp
+participant "SMTP2GO" as smtp
 
 Usuario -> app : completa registro
 app -> ctrl : POST /api/auth/registro
