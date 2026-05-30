@@ -1,13 +1,11 @@
 package com.skillsharing.application.service;
 
 import com.skillsharing.application.dto.request.SesionRequestDto;
-import com.skillsharing.domain.entity.Habilidad;
 import com.skillsharing.domain.entity.SesionAprendizaje;
 import com.skillsharing.domain.entity.Usuario;
 import com.skillsharing.domain.enums.EstadoSesion;
 import com.skillsharing.domain.enums.TipoSesion;
 import com.skillsharing.domain.factory.SesionFactory;
-import com.skillsharing.infrastructure.repository.HabilidadRepository;
 import com.skillsharing.infrastructure.repository.SesionRepository;
 import com.skillsharing.infrastructure.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +15,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 
-// servicio central de sesiones (hu06, hu07, hu08, hu11)
-// principio srp (semana 2): gestiona logica de negocio de sesiones, pero delega el cambio de estado al facade
+// servicio central de sesiones del sprint 1
+// principio srp (semana 2): concentra la logica de negocio de sesiones
 //
 // relacion con diagrama de secuencia:
 //   SesionController -> SesionService -> [SesionRepository, SesionFactory]
@@ -28,9 +26,8 @@ public class SesionService {
 
     private final SesionRepository sesionRepository;
     private final UsuarioRepository usuarioRepository;
-    private final HabilidadRepository habilidadRepository;
 
-    // hu06: crear sesion de aprendizaje
+    // hu01: crear sesion de aprendizaje
     // usa el patron factory (semana 3) para decidir que tipo de sesion instanciar
     @Transactional
     public SesionAprendizaje crearSesion(Long instructorId, SesionRequestDto dto) {
@@ -43,16 +40,10 @@ public class SesionService {
 
         long sesionesAbiertas = sesionRepository.countByInstructorUsuarioIdAndEstadoIn(
                 instructorId,
-                List.of(EstadoSesion.PENDIENTE, EstadoSesion.ACTIVA)
+                List.of(EstadoSesion.ACTIVA)
         );
         if (sesionesAbiertas >= 5) {
             throw new IllegalStateException("alcanzaste el limite de 5 sesiones activas creadas");
-        }
-
-        Habilidad habilidad = null;
-        if (dto.getHabilidadId() != null) {
-            habilidad = habilidadRepository.findById(dto.getHabilidadId())
-                    .orElseThrow(() -> new RuntimeException("habilidad requerida no encontrada"));
         }
 
         int maxParticipantes = dto.getMaxParticipantes() == null ? 20 : dto.getMaxParticipantes();
@@ -67,12 +58,12 @@ public class SesionService {
         if ("VIRTUAL".equalsIgnoreCase(dto.getModalidad())) {
             nuevaSesion = SesionFactory.crearVirtual(
                     dto.getTitulo(), dto.getDescripcion(), dto.getFechaSesion(),
-                    maxParticipantes, dto.getLinkSesion(), instructor, habilidad, tipo
+                    maxParticipantes, dto.getLinkSesion(), instructor, tipo
             );
         } else if ("PRESENCIAL".equalsIgnoreCase(dto.getModalidad())) {
             nuevaSesion = SesionFactory.crearPresencial(
                     dto.getTitulo(), dto.getDescripcion(), dto.getFechaSesion(),
-                    maxParticipantes, dto.getLugar(), instructor, habilidad, tipo
+                    maxParticipantes, dto.getLugar(), instructor, tipo
             );
         } else {
             throw new IllegalArgumentException("modalidad invalida");
@@ -81,7 +72,7 @@ public class SesionService {
         return sesionRepository.save(nuevaSesion);
     }
 
-    // hu07: listar sesiones activas (aprobadas)
+    // hu16: listar sesiones publicas activas
     public List<SesionAprendizaje> listarActivas() {
         return sesionRepository.findByEstadoAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
                 EstadoSesion.ACTIVA,
@@ -90,13 +81,13 @@ public class SesionService {
         );
     }
 
-    // hu08: ver detalle de sesion
+    // hu04: ver detalle de sesion
     public SesionAprendizaje obtenerDetalle(Long sesionId) {
         return sesionRepository.findById(sesionId)
                 .orElseThrow(() -> new RuntimeException("sesion no encontrada"));
     }
 
-    // hu11: ver mis sesiones (como instructor)
+    // hu02: ver mis sesiones como instructor
     public List<SesionAprendizaje> listarPorInstructor(Long instructorId) {
         return sesionRepository.findByInstructorUsuarioIdAndFechaSesionAfterOrderByFechaSesionAsc(
                 instructorId,

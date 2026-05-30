@@ -6,8 +6,6 @@ import com.skillsharing.domain.enums.TipoSesion;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 // sesionaprendizaje reemplaza a evento del proyecto myevent
 // principio srp (semana 2): solo contiene datos, la logica va en sesionservice
@@ -38,7 +36,7 @@ public class SesionAprendizaje {
     @Builder.Default
     private ModalidadSesion modalidad = ModalidadSesion.VIRTUAL;
 
-    // patron state (semana 5): pendiente -> activa -> finalizada / rechazada
+    // patron state (semana 5): activa -> finalizada
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     @Builder.Default
@@ -66,23 +64,6 @@ public class SesionAprendizaje {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "instructor_id", nullable = false)
     private Usuario instructor;
-
-    // hu28: habilidad requerida para filtrar en el buscador
-    // reemplaza la categoria social del myevent original
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "habilidad_id")
-    private Habilidad habilidadRequerida;
-
-    // hu05: el admin solo puede aprobar si esto es true
-    // el instructor sube el material educativo -> se actualiza a true
-    @Column(name = "material_cargado", nullable = false)
-    @Builder.Default
-    private Boolean materialCargado = false;
-
-    // materiales educativos asociados a esta sesion (hu05)
-    @OneToMany(mappedBy = "sesion", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Builder.Default
-    private List<MaterialEducativo> materiales = new ArrayList<>();
 
     @Column(name = "fecha_creacion", nullable = false)
     @Builder.Default

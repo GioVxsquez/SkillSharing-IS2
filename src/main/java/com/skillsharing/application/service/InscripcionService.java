@@ -1,6 +1,5 @@
 package com.skillsharing.application.service;
 
-import com.skillsharing.application.observer.SesionObserver;
 import com.skillsharing.domain.entity.Inscripcion;
 import com.skillsharing.domain.entity.SesionAprendizaje;
 import com.skillsharing.domain.entity.Usuario;
@@ -22,7 +21,6 @@ public class InscripcionService {
     private final InscripcionRepository inscripcionRepository;
     private final SesionRepository sesionRepository;
     private final UsuarioRepository usuarioRepository;
-    private final List<SesionObserver> observadores; // para notificar inscripcion
 
     @Transactional
     public Inscripcion inscribir(Long sesionId, Long usuarioId) {
@@ -69,14 +67,7 @@ public class InscripcionService {
                 .rolSesion("APRENDIZ")
                 .build();
                 
-        Inscripcion guardada = inscripcionRepository.save(inscripcion);
-
-        // notificar al instructor (patron observer)
-        for (SesionObserver obs : observadores) {
-            obs.onSesionActualizada(sesion, "INSCRIPCION");
-        }
-
-        return guardada;
+        return inscripcionRepository.save(inscripcion);
     }
 
     public List<Inscripcion> listarPorUsuario(Long usuarioId) {

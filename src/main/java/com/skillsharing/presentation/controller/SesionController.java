@@ -4,7 +4,6 @@ import com.skillsharing.application.dto.request.SesionRequestDto;
 import com.skillsharing.application.dto.response.ApiResponse;
 import com.skillsharing.application.dto.response.ParticipanteResponseDto;
 import com.skillsharing.application.dto.response.SesionResponseDto;
-import com.skillsharing.application.service.BuscadorService;
 import com.skillsharing.application.service.InscripcionService;
 import com.skillsharing.application.service.SesionService;
 import com.skillsharing.domain.entity.Inscripcion;
@@ -27,11 +26,10 @@ import java.util.stream.Collectors;
 public class SesionController {
 
     private final SesionService sesionService;
-    private final BuscadorService buscadorService;
     private final InscripcionService inscripcionService;
     private final UsuarioRepository usuarioRepository;
 
-    // hu06: crear sesion (solo instructores)
+    // hu01: crear sesion (solo instructores)
     @PostMapping
     public ResponseEntity<ApiResponse<SesionResponseDto>> crearSesion(
             @Valid @RequestBody SesionRequestDto dto,
@@ -45,7 +43,7 @@ public class SesionController {
         }
 
         SesionAprendizaje creada = sesionService.crearSesion(instructor.getUsuarioId(), dto);
-        return ResponseEntity.ok(ApiResponse.exito("sesion creada con exito (pendiente de aprobacion)", SesionResponseDto.fromEntity(creada)));
+        return ResponseEntity.ok(ApiResponse.exito("sesion creada con exito", SesionResponseDto.fromEntity(creada)));
     }
 
     // hu07: listar sesiones activas (publico para usuarios autenticados)
@@ -84,7 +82,7 @@ public class SesionController {
     }
 
     // hu17: alias usado por detalle de sesion para confirmar asistencia publica
-    @PostMapping("/{sesionId}/inscribirse")
+    @PostMapping("/{sesionId:[0-9]+}/inscribirse")
     public ResponseEntity<ApiResponse<String>> inscribirse(
             @PathVariable Long sesionId,
             Authentication auth) {
@@ -96,7 +94,7 @@ public class SesionController {
     }
 
     // hu26: asistentes confirmados de una sesion
-    @GetMapping("/{sesionId}/invitados")
+    @GetMapping("/{sesionId:[0-9]+}/invitados")
     public ResponseEntity<ApiResponse<List<ParticipanteResponseDto>>> invitados(@PathVariable Long sesionId) {
         List<ParticipanteResponseDto> lista = inscripcionService.listarInvitados(sesionId).stream()
                 .map(ParticipanteResponseDto::fromEntity)
@@ -105,21 +103,8 @@ public class SesionController {
         return ResponseEntity.ok(ApiResponse.exito("invitados confirmados", lista));
     }
 
-    // hu28: buscar sesiones por habilidad o titulo usando el patron strategy
-    @GetMapping("/buscar")
-    public ResponseEntity<ApiResponse<List<SesionResponseDto>>> buscar(
-            @RequestParam(defaultValue = "habilidad") String tipo,
-            @RequestParam String q) {
-            
-        List<SesionResponseDto> resultados = buscadorService.buscar(tipo, q).stream()
-                .map(SesionResponseDto::fromEntity)
-                .collect(Collectors.toList());
-                
-        return ResponseEntity.ok(ApiResponse.exito("resultados de busqueda", resultados));
-    }
-
-    // hu08: ver detalle de una sesion especifica
-    @GetMapping("/{id}")
+    // hu04: ver detalle de una sesion especifica
+    @GetMapping("/{id:[0-9]+}")
     public ResponseEntity<ApiResponse<SesionResponseDto>> verDetalle(@PathVariable Long id) {
         SesionAprendizaje sesion = sesionService.obtenerDetalle(id);
         return ResponseEntity.ok(ApiResponse.exito("detalle de sesion", SesionResponseDto.fromEntity(sesion)));

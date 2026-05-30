@@ -6,8 +6,8 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 // hu06: entidad para gestionar invitaciones privadas a sesiones
-// patron de diseño estructural (semana 4): aqui podriamos aplicar adapter si necesitaramos integrarnos
-// con un sistema externo de notificaciones o correos en el futuro
+// hu07: guarda si la invitacion fue aceptada o rechazada
+// hu28: permite listar invitaciones pendientes del usuario
 @Entity
 @Table(name = "invitaciones")
 @Getter
@@ -19,6 +19,7 @@ public class Invitacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "invitacion_id")
     private Long invitacionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -30,9 +31,11 @@ public class Invitacion {
     private Usuario invitado;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private EstadoInvitacion estado;
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private EstadoInvitacion estado = EstadoInvitacion.PENDIENTE;
 
-    @Column(nullable = false)
-    private LocalDateTime fechaEnvio;
+    @Column(name = "fecha_envio", nullable = false)
+    @Builder.Default
+    private LocalDateTime fechaEnvio = LocalDateTime.now();
 }

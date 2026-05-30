@@ -25,8 +25,6 @@ public class SesionResponseDto {
     private String ubicacion;
     private Long instructorId;
     private String instructorNombre;
-    private String habilidadRequerida;
-    private Boolean materialCargado;
     private LocalDateTime fechaCreacion;
 
     // conversion desde entidad al dto (patron de mapeo)
@@ -45,14 +43,10 @@ public class SesionResponseDto {
         dto.setLinkSesion(s.getLinkSesion());
         dto.setLugar(s.getLugar());
         dto.setUbicacion(s.getLugar() != null ? s.getLugar() : s.getLinkSesion());
-        dto.setMaterialCargado(s.getMaterialCargado());
         dto.setFechaCreacion(s.getFechaCreacion());
         if (s.getInstructor() != null) {
             dto.setInstructorId(s.getInstructor().getUsuarioId());
             dto.setInstructorNombre(s.getInstructor().getNombre());
-        }
-        if (s.getHabilidadRequerida() != null) {
-            dto.setHabilidadRequerida(s.getHabilidadRequerida().getNombre());
         }
         return dto;
     }

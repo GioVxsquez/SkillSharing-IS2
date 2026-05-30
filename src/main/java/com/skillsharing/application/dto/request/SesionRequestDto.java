@@ -38,6 +38,4 @@ public class SesionRequestDto {
     // solo para sesiones presenciales
     private String lugar;
 
-    // hu28: habilidad requerida para la sesion (filtra en el buscador)
-    private Long habilidadId;
 }

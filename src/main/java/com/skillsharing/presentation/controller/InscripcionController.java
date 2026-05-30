@@ -26,7 +26,7 @@ public class InscripcionController {
     private final UsuarioRepository usuarioRepository;
 
     // hu17: confirmar asistencia publica
-    @PostMapping("/{sesionId}/asistir")
+    @PostMapping("/{sesionId:[0-9]+}/asistir")
     public ResponseEntity<ApiResponse<String>> asistirPublico(
             @PathVariable Long sesionId,
             Authentication auth) {
@@ -52,7 +52,7 @@ public class InscripcionController {
     }
 
     // hu26: visualizar invitados (asistentes de un evento)
-    @GetMapping("/sesion/{sesionId}/invitados")
+    @GetMapping("/sesion/{sesionId:[0-9]+}/invitados")
     public ResponseEntity<ApiResponse<List<ParticipanteResponseDto>>> verInvitados(
             @PathVariable Long sesionId,
             Authentication auth) {

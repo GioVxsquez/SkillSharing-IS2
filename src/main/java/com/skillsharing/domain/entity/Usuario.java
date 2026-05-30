@@ -4,8 +4,6 @@ import com.skillsharing.domain.enums.RolUsuario;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 // entidad principal del sistema
 // principio srp (semana 2): solo representa los datos del usuario
@@ -33,18 +31,6 @@ public class Usuario {
 
     @Column(name = "foto_perfil", length = 500)
     private String fotoPerfil;
-
-    // hu22: el usuario tiene un conjunto de habilidades en su perfil
-    // programacion, idiomas, cocina, etc
-    // relacion muchos a muchos: un usuario puede tener varias habilidades
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "usuario_habilidad",
-        joinColumns        = @JoinColumn(name = "usuario_id"),
-        inverseJoinColumns = @JoinColumn(name = "habilidad_id")
-    )
-    @Builder.Default
-    private Set<Habilidad> habilidades = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

@@ -1,6 +1,5 @@
 package com.skillsharing.domain.factory;
 
-import com.skillsharing.domain.entity.Habilidad;
 import com.skillsharing.domain.entity.SesionAprendizaje;
 import com.skillsharing.domain.entity.Usuario;
 import com.skillsharing.domain.enums.EstadoSesion;
@@ -23,7 +22,6 @@ public class SesionFactory {
             int maxParticipantes,
             String linkSesion,
             Usuario instructor,
-            Habilidad habilidad,
             TipoSesion tipo) {
 
         return SesionAprendizaje.builder()
@@ -31,13 +29,11 @@ public class SesionFactory {
                 .descripcion(descripcion)
                 .fechaSesion(fecha)
                 .modalidad(ModalidadSesion.VIRTUAL)
-                .estado(EstadoSesion.PENDIENTE)
+                .estado(EstadoSesion.ACTIVA)
                 .tipo(tipo)
                 .maxParticipantes(maxParticipantes)
                 .linkSesion(linkSesion)
                 .instructor(instructor)
-                .habilidadRequerida(habilidad)
-                .materialCargado(false)
                 .fechaCreacion(LocalDateTime.now())
                 .build();
     }
@@ -51,7 +47,6 @@ public class SesionFactory {
             int maxParticipantes,
             String lugar,
             Usuario instructor,
-            Habilidad habilidad,
             TipoSesion tipo) {
 
         return SesionAprendizaje.builder()
@@ -59,13 +54,11 @@ public class SesionFactory {
                 .descripcion(descripcion)
                 .fechaSesion(fecha)
                 .modalidad(ModalidadSesion.PRESENCIAL)
-                .estado(EstadoSesion.PENDIENTE)
+                .estado(EstadoSesion.ACTIVA)
                 .tipo(tipo)
                 .maxParticipantes(maxParticipantes)
                 .lugar(lugar)
                 .instructor(instructor)
-                .habilidadRequerida(habilidad)
-                .materialCargado(false)
                 .fechaCreacion(LocalDateTime.now())
                 .build();
     }

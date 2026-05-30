@@ -34,7 +34,6 @@ public class SecurityConfig {
             .cors(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll() // endpoints publicos (login, registro)
-                .requestMatchers("/api/admin/**").hasRole("ADMIN") // solo admin
                 .anyRequest().authenticated() // el resto requiere token
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

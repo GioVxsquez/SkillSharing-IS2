@@ -1,13 +1,11 @@
 package com.skillsharing.application.service;
 
 import com.skillsharing.domain.entity.Invitacion;
-import com.skillsharing.domain.entity.Notificacion;
 import com.skillsharing.domain.entity.SesionAprendizaje;
 import com.skillsharing.domain.entity.Usuario;
 import com.skillsharing.domain.enums.EstadoInvitacion;
 import com.skillsharing.domain.enums.TipoSesion;
 import com.skillsharing.infrastructure.repository.InvitacionRepository;
-import com.skillsharing.infrastructure.repository.NotificacionRepository;
 import com.skillsharing.infrastructure.repository.SesionRepository;
 import com.skillsharing.infrastructure.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +23,6 @@ public class InvitacionService {
     private final SesionRepository sesionRepository;
     private final UsuarioRepository usuarioRepository;
     private final InscripcionService inscripcionService;
-    private final NotificacionRepository notificacionRepository;
 
     // hu06: invitar asistentes
     @Transactional
@@ -71,15 +68,7 @@ public class InvitacionService {
                 .fechaEnvio(LocalDateTime.now())
                 .build();
                 
-        Invitacion guardada = invitacionRepository.save(inv);
-
-        notificacionRepository.save(Notificacion.builder()
-                .usuario(invitado)
-                .sesion(sesion)
-                .mensaje("recibiste una invitacion para la sesion '" + sesion.getTitulo() + "'")
-                .build());
-
-        return guardada;
+        return invitacionRepository.save(inv);
     }
 
     // hu28: visualizar invitaciones privadas

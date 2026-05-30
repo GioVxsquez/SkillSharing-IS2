@@ -23,7 +23,7 @@ public class InvitacionController {
     private final UsuarioRepository usuarioRepository;
 
     // hu06: invitar asistentes
-    @PostMapping("/sesion/{sesionId}/invitar/{invitadoId}")
+    @PostMapping("/sesion/{sesionId:[0-9]+}/invitar/{invitadoId:[0-9]+}")
     public ResponseEntity<ApiResponse<String>> invitar(
             @PathVariable Long sesionId, 
             @PathVariable Long invitadoId,
@@ -62,7 +62,7 @@ public class InvitacionController {
     }
 
     // hu07: confirmar asistencia privada
-    @PostMapping("/{invitacionId}/responder")
+    @PostMapping("/{invitacionId:[0-9]+}/responder")
     public ResponseEntity<ApiResponse<String>> responder(
             @PathVariable Long invitacionId, 
             @RequestParam boolean aceptar,
@@ -71,7 +71,7 @@ public class InvitacionController {
     }
 
     // hu07: alias usado por la app movil
-    @PutMapping("/{invitacionId}/responder")
+    @PutMapping("/{invitacionId:[0-9]+}/responder")
     public ResponseEntity<ApiResponse<String>> responderPut(
             @PathVariable Long invitacionId,
             @RequestParam boolean aceptar,
