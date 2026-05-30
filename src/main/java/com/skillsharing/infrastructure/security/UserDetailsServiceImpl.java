@@ -24,9 +24,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("usuario no encontrado: " + email));
 
+        // el campo 'activo' controla si la cuenta fue verificada por correo (HU29)
+        // spring security lanzara DisabledException si enabled=false,
+        // que el AuthController captura y devuelve un mensaje claro al frontend
         return new User(
                 usuario.getEmail(),
                 usuario.getPassword(),
+                usuario.getActivo(), // enabled
+                true,                // accountNonExpired
+                true,                // credentialsNonExpired
+                true,                // accountNonLocked
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().name()))
         );
     }

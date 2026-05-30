@@ -105,6 +105,12 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- spring mail - envio de correos smtp para verificacion de cuenta -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

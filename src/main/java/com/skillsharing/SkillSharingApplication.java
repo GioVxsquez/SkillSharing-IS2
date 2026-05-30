@@ -2,11 +2,14 @@ package com.skillsharing;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 // punto de entrada de la aplicacion
 // spring arranca el contexto y registra todos los beans automaticamente
 // patron singleton (semana 3): spring gestiona una sola instancia de cada servicio
 // arquitectura de capas (semana 7): controller -> service -> repository -> entity
+// @enableasync permite que emailservice envie correos sin bloquear el hilo principal
+@EnableAsync
 @SpringBootApplication
 public class SkillSharingApplication {
 
