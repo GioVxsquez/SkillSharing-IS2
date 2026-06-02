@@ -23,7 +23,7 @@ public class VerificacionToken {
     private String token;
 
     // relacion con el usuario dueno del token
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
