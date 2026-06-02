@@ -22,11 +22,12 @@ public class Invitacion {
     @Column(name = "invitacion_id")
     private Long invitacionId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sesion_id", nullable = false)
     private SesionAprendizaje sesion;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // a quien se le envia la invitacion (el aprendiz)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "invitado_id", nullable = false)
     private Usuario invitado;
 

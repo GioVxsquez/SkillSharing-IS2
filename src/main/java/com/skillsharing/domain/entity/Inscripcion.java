@@ -18,11 +18,11 @@ public class Inscripcion {
     @Column(name = "inscripcion_id")
     private Long inscripcionId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sesion_id", nullable = false)
     private SesionAprendizaje sesion;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 

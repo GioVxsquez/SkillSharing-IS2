@@ -61,7 +61,7 @@ public class SesionAprendizaje {
     private String lugar;
 
     // quien crea y dirige la sesion
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "instructor_id", nullable = false)
     private Usuario instructor;
 
