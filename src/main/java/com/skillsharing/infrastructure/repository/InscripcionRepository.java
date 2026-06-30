@@ -36,4 +36,13 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> 
     List<Inscripcion> findVigentesByUsuario(
             @Param("usuarioId") Long usuarioId,
             @Param("limite") LocalDateTime limite);
+
+    // us25: validar cruce de horarios - buscar inscripciones en ventana de tiempo
+    @Query("SELECT i FROM Inscripcion i WHERE i.usuario.usuarioId = :usuarioId " +
+           "AND i.sesion.estado IN ('ACTIVA', 'PENDIENTE') " +
+           "AND i.sesion.fechaSesion BETWEEN :desde AND :hasta")
+    List<Inscripcion> findConflictoHorario(
+            @Param("usuarioId") Long usuarioId,
+            @Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta);
 }

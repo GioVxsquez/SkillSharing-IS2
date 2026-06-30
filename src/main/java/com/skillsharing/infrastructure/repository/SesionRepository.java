@@ -30,4 +30,15 @@ public interface SesionRepository extends JpaRepository<SesionAprendizaje, Long>
             Long instructorId,
             LocalDateTime fecha);
 
+    // us03: buscador por nombre/titulo
+    List<SesionAprendizaje> findByTituloContainingIgnoreCaseAndEstadoAndTipo(
+            String titulo, EstadoSesion estado, TipoSesion tipo);
+
+    // us09: filtrar por categoria
+    List<SesionAprendizaje> findByCategoriaIgnoreCaseAndEstadoAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
+            String categoria, EstadoSesion estado, TipoSesion tipo, LocalDateTime fecha);
+
+    // us11: filtrar por modalidad
+    List<SesionAprendizaje> findByModalidadAndEstadoAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
+            com.skillsharing.domain.enums.ModalidadSesion modalidad, EstadoSesion estado, TipoSesion tipo, LocalDateTime fecha);
 }
