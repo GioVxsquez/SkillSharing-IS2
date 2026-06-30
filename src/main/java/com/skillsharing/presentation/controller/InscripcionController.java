@@ -62,4 +62,14 @@ public class InscripcionController {
                 .toList();
         return ResponseEntity.ok(ApiResponse.exito("lista de invitados confirmados", lista));
     }
+
+    // us18: desinscribirse de una sesion publica
+    @DeleteMapping("/{sesionId}/salir")
+    public ResponseEntity<ApiResponse<String>> desinscribirse(
+            @PathVariable Long sesionId, Authentication auth) {
+        Long usuarioId = usuarioRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("usuario no encontrado")).getUsuarioId();
+        inscripcionService.desinscribirse(sesionId, usuarioId);
+        return ResponseEntity.ok(ApiResponse.exito("te has desinscrito correctamente de la sesion", null));
+    }
 }

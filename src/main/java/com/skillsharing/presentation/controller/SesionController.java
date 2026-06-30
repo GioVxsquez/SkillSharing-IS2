@@ -122,4 +122,40 @@ public class SesionController {
                 
         return ResponseEntity.ok(ApiResponse.exito("mis eventos gestionados", lista));
     }
+
+    // us03: buscador de sesiones por nombre
+    @GetMapping("/buscar")
+    public ResponseEntity<ApiResponse<List<SesionResponseDto>>> buscar(@RequestParam String q) {
+        List<SesionResponseDto> lista = sesionService.buscarPorNombre(q).stream()
+                .map(SesionResponseDto::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.exito("resultados de busqueda", lista));
+    }
+
+    // us08: cancelar una sesion (cambia estado a CANCELADA)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<SesionResponseDto>> cancelar(@PathVariable Long id, Authentication auth) {
+        Long instructorId = usuarioRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("usuario no encontrado")).getUsuarioId();
+        SesionAprendizaje cancelada = sesionService.cancelarSesion(id, instructorId);
+        return ResponseEntity.ok(ApiResponse.exito("sesion cancelada correctamente", SesionResponseDto.fromEntity(cancelada)));
+    }
+
+    // us09: filtrar por categoria
+    @GetMapping("/categoria/{categoria}")
+    public ResponseEntity<ApiResponse<List<SesionResponseDto>>> porCategoria(@PathVariable String categoria) {
+        List<SesionResponseDto> lista = sesionService.filtrarPorCategoria(categoria).stream()
+                .map(SesionResponseDto::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.exito("sesiones por categoria", lista));
+    }
+
+    // us11: filtrar por modalidad
+    @GetMapping("/modalidad/{modalidad}")
+    public ResponseEntity<ApiResponse<List<SesionResponseDto>>> porModalidad(@PathVariable String modalidad) {
+        List<SesionResponseDto> lista = sesionService.filtrarPorModalidad(modalidad).stream()
+                .map(SesionResponseDto::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.exito("sesiones por modalidad", lista));
+    }
 }
