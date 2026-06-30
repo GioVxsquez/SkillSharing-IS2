@@ -157,6 +157,9 @@ export default function HomeScreen({ navigation }: any) {
           <TouchableOpacity onPress={() => navigation.navigate('Notificaciones')} style={styles.headerBtn}>
             <Text style={styles.headerBtnTexto}>Alertas {unreadNotifications > 0 ? `(${unreadNotifications})` : ''}</Text>
           </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('BuscarInstructores')} style={styles.headerBtn}>
+            <Text style={styles.headerBtnTexto}>Instructores</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('MisSesiones')} style={styles.headerBtn}>
             <Text style={styles.headerBtnTexto}>Mis Sesiones</Text>
           </TouchableOpacity>
