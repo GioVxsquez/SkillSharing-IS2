@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { api } from '../api/config';
 
-// HU01: crear una sesion como instructor
+// HU01, US09: crear una sesion como instructor indicando su categoria
 export default function CrearSesionScreen({ navigation }: any) {
   const [titulo, setTitulo]           = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -14,7 +14,10 @@ export default function CrearSesionScreen({ navigation }: any) {
   const [capacidad, setCapacidad]     = useState('');
   const [fechaSesion, setFecha]       = useState('');
   const [esPrivada, setEsPrivada]     = useState(false);
+  const [categoria, setCategoria]     = useState('Programacion');
   const [loading, setLoading]         = useState(false);
+
+  const categorias = ['Programacion', 'Idiomas', 'Cocina', 'Diseno Grafico', 'Matematicas', 'Musica', 'Fotografia', 'Marketing Digital', 'Finanzas'];
 
   const handleCrear = async () => {
     if (!titulo.trim()) {
@@ -38,13 +41,14 @@ export default function CrearSesionScreen({ navigation }: any) {
         privada: esPrivada,
         linkSesion: ubicacion.trim(),
         lugar: ubicacion.trim(),
+        categoria: categoria,
       };
 
       const resp = await api.post('/sesiones', payload);
       if (resp.data.ok) {
         Alert.alert(
           'Sesion creada',
-          'Tu sesion fue creada y queda pendiente de aprobacion.',
+          'Tu sesion fue creada exitosamente.',
           [{ text: 'OK', onPress: () => navigation.goBack() }]
         );
       } else {
@@ -90,6 +94,22 @@ export default function CrearSesionScreen({ navigation }: any) {
             multiline
             numberOfLines={4}
           />
+        </View>
+
+        {/* Selector de Categoría */}
+        <View style={styles.campo}>
+          <Text style={styles.label}>Categoría</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollCategorias}>
+            {categorias.map((cat) => (
+              <TouchableOpacity
+                key={cat}
+                style={[styles.categoryChip, categoria === cat && styles.categoryChipActive]}
+                onPress={() => setCategoria(cat)}
+              >
+                <Text style={[styles.categoryChipText, categoria === cat && styles.categoryChipTextActive]}>{cat}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
 
         <View style={styles.campo}>
@@ -171,6 +191,11 @@ const styles = StyleSheet.create({
   input: { backgroundColor: '#FFFFFF', borderWidth: 1.5, borderColor: '#E2E8F0', borderRadius: 10, paddingVertical: 13, paddingHorizontal: 16, fontSize: 15, color: '#1A202C' },
   textArea: { minHeight: 100, textAlignVertical: 'top' },
   row: { flexDirection: 'row' },
+  scrollCategorias: { gap: 8, paddingVertical: 4 },
+  categoryChip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, backgroundColor: '#E2E8F0', marginRight: 8 },
+  categoryChipActive: { backgroundColor: '#1B3A6B' },
+  categoryChipText: { fontSize: 13, color: '#4A5568', fontWeight: '600' },
+  categoryChipTextActive: { color: '#FFFFFF' },
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 12, padding: 16, marginBottom: 24, borderWidth: 1.5, borderColor: '#E2E8F0' },
   toggleHint: { fontSize: 12, color: '#718096', marginTop: 2 },
   boton: { backgroundColor: '#1B3A6B', paddingVertical: 16, borderRadius: 12, alignItems: 'center', elevation: 5 },
