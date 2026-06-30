@@ -111,4 +111,46 @@ public class SesionService {
             throw new IllegalArgumentException("tipo de sesion invalido: usa PUBLICA o PRIVADA");
         }
     }
+
+    // us03: buscador de sesiones por nombre/titulo
+    public List<SesionAprendizaje> buscarPorNombre(String query) {
+        return sesionRepository.findByTituloContainingIgnoreCaseAndEstadoAndTipo(
+                query, EstadoSesion.ACTIVA, TipoSesion.PUBLICA);
+    }
+
+    // us08: cancelar una sesion (cambia estado a CANCELADA)
+    @Transactional
+    public SesionAprendizaje cancelarSesion(Long sesionId, Long instructorId) {
+        SesionAprendizaje sesion = sesionRepository.findById(sesionId)
+                .orElseThrow(() -> new RuntimeException("sesion no encontrada"));
+
+        if (!sesion.getInstructor().getUsuarioId().equals(instructorId)) {
+            throw new SecurityException("solo el instructor dueno puede cancelar la sesion");
+        }
+
+        if (sesion.getEstado() == EstadoSesion.FINALIZADA || sesion.getEstado() == EstadoSesion.CANCELADA) {
+            throw new IllegalStateException("no se puede cancelar una sesion ya finalizada o cancelada");
+        }
+
+        sesion.setEstado(EstadoSesion.CANCELADA);
+        return sesionRepository.save(sesion);
+    }
+
+    // us09: filtrar sesiones por categoria
+    public List<SesionAprendizaje> filtrarPorCategoria(String categoria) {
+        return sesionRepository.findByCategoriaIgnoreCaseAndEstadoAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
+                categoria, EstadoSesion.ACTIVA, TipoSesion.PUBLICA, LocalDateTime.now());
+    }
+
+    // us11: filtrar sesiones por modalidad (VIRTUAL o PRESENCIAL)
+    public List<SesionAprendizaje> filtrarPorModalidad(String modalidad) {
+        com.skillsharing.domain.enums.ModalidadSesion mod;
+        try {
+            mod = com.skillsharing.domain.enums.ModalidadSesion.valueOf(modalidad.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("modalidad invalida. Usa VIRTUAL o PRESENCIAL");
+        }
+        return sesionRepository.findByModalidadAndEstadoAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
+                mod, EstadoSesion.ACTIVA, TipoSesion.PUBLICA, LocalDateTime.now());
+    }
 }

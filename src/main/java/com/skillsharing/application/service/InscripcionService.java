@@ -61,6 +61,14 @@ public class InscripcionService {
             throw new IllegalStateException("la sesion ha alcanzado el maximo de participantes");
         }
 
+        // us25: validar cruce de horarios (ventana de 2 horas antes y despues)
+        LocalDateTime desde = sesion.getFechaSesion().minusHours(2);
+        LocalDateTime hasta = sesion.getFechaSesion().plusHours(2);
+        List<Inscripcion> conflictos = inscripcionRepository.findConflictoHorario(usuarioId, desde, hasta);
+        if (!conflictos.isEmpty()) {
+            throw new IllegalStateException("tienes un cruce de horario con otra sesion en ese mismo momento");
+        }
+
         Inscripcion inscripcion = Inscripcion.builder()
                 .sesion(sesion)
                 .usuario(usuario)
@@ -76,5 +84,22 @@ public class InscripcionService {
 
     public List<Inscripcion> listarInvitados(Long sesionId) {
         return inscripcionRepository.findBySesionSesionId(sesionId);
+    }
+
+    // us18: desinscribirse de una sesion publica
+    @Transactional
+    public void desinscribirse(Long sesionId, Long usuarioId) {
+        SesionAprendizaje sesion = sesionRepository.findById(sesionId)
+                .orElseThrow(() -> new RuntimeException("sesion no encontrada"));
+
+        if (sesion.getFechaSesion().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("no puedes desinscribirte de una sesion que ya inicio");
+        }
+
+        Inscripcion inscripcion = inscripcionRepository
+                .findBySesionSesionIdAndUsuarioUsuarioId(sesionId, usuarioId)
+                .orElseThrow(() -> new RuntimeException("no estas inscrito en esta sesion"));
+
+        inscripcionRepository.delete(inscripcion);
     }
 }

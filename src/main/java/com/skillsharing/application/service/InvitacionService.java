@@ -23,6 +23,7 @@ public class InvitacionService {
     private final SesionRepository sesionRepository;
     private final UsuarioRepository usuarioRepository;
     private final InscripcionService inscripcionService;
+    private final NotificacionService notificacionService;
 
     // hu06: invitar asistentes
     @Transactional
@@ -68,7 +69,12 @@ public class InvitacionService {
                 .fechaEnvio(LocalDateTime.now())
                 .build();
                 
-        return invitacionRepository.save(inv);
+        Invitacion saved = invitacionRepository.save(inv);
+
+        // us12: notificar al invitado
+        notificacionService.crear(invitado, sesion, "Has recibido una invitacion para la sesion: " + sesion.getTitulo());
+
+        return saved;
     }
 
     // hu28: visualizar invitaciones privadas
@@ -105,6 +111,14 @@ public class InvitacionService {
             inv.setEstado(EstadoInvitacion.RECHAZADA);
         }
         
-        invitacionRepository.save(inv);
+        Invitacion saved = invitacionRepository.save(inv);
+
+        // us13: notificar al instructor
+        String respuesta = aceptar ? "aceptado" : "rechazado";
+        notificacionService.crear(
+            inv.getSesion().getInstructor(),
+            inv.getSesion(),
+            inv.getInvitado().getNombre() + " ha " + respuesta + " tu invitacion a: " + inv.getSesion().getTitulo()
+        );
     }
 }
