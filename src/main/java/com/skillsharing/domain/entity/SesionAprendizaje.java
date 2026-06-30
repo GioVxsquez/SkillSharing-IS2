@@ -65,6 +65,15 @@ public class SesionAprendizaje {
     @JoinColumn(name = "instructor_id", nullable = false)
     private Usuario instructor;
 
+    // us09: categoria para filtrar sesiones en el home
+    @Column(length = 100)
+    private String categoria;
+
+    // us21/us22: habilidad requerida para participar en la sesion
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "habilidad_id")
+    private Habilidad habilidad;
+
     @Column(name = "fecha_creacion", nullable = false)
     @Builder.Default
     private LocalDateTime fechaCreacion = LocalDateTime.now();

@@ -41,6 +41,16 @@ public class Usuario {
     @Builder.Default
     private Boolean activo = true;
 
+    // us21/us22: habilidades del perfil del instructor
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "usuario_habilidad",
+        joinColumns = @JoinColumn(name = "usuario_id"),
+        inverseJoinColumns = @JoinColumn(name = "habilidad_id")
+    )
+    @Builder.Default
+    private java.util.Set<Habilidad> habilidades = new java.util.HashSet<>();
+
     @Column(name = "fecha_registro", nullable = false)
     @Builder.Default
     private LocalDateTime fechaRegistro = LocalDateTime.now();

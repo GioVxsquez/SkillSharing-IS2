@@ -7,5 +7,6 @@ public enum EstadoSesion {
     PENDIENTE,   // reservado para releases posteriores
     ACTIVA,      // visible y abierta a inscripciones
     FINALIZADA,  // la sesion ya ocurrio
-    RECHAZADA    // reservado para releases posteriores
+    RECHAZADA,   // reservado para releases posteriores
+    CANCELADA    // US08: sesión cancelada por el instructor
 }
