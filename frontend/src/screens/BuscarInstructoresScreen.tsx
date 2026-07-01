@@ -82,11 +82,20 @@ export default function BuscarInstructoresScreen({ navigation }: any) {
                 <View style={{ flex: 1 }}>
                   <Text style={styles.nombre}>{item.nombre}</Text>
                   <Text style={styles.email}>{item.email}</Text>
+                  {/* US20: reputacion del instructor */}
+                  {item.reputacionPromedio > 0 ? (
+                    <Text style={styles.reputacion}>
+                      {'★'.repeat(Math.round(item.reputacionPromedio))}{'☆'.repeat(5 - Math.round(item.reputacionPromedio))} {item.reputacionPromedio.toFixed(1)}
+                    </Text>
+                  ) : (
+                    <Text style={styles.sinReputacion}>Sin calificaciones aún</Text>
+                  )}
+                  {/* US22: habilidades del instructor */}
                   {item.habilidades?.length > 0 && (
                     <View style={styles.habilidadesRow}>
-                      {item.habilidades.slice(0, 3).map((h: any) => (
-                        <View key={h.habilidadId} style={styles.habBadge}>
-                          <Text style={styles.habTexto}>{h.nombre}</Text>
+                      {item.habilidades.slice(0, 3).map((h: string, i: number) => (
+                        <View key={i} style={styles.habBadge}>
+                          <Text style={styles.habTexto}>{h}</Text>
                         </View>
                       ))}
                     </View>
@@ -130,5 +139,7 @@ const styles = StyleSheet.create({
   habilidadesRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 },
   habBadge: { backgroundColor: '#EBF4FF', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 },
   habTexto: { fontSize: 11, color: '#1B3A6B', fontWeight: '600' },
+  reputacion: { fontSize: 14, color: '#D69E2E', fontWeight: '700', marginTop: 4 },
+  sinReputacion: { fontSize: 12, color: '#A0AEC0', marginTop: 4, fontStyle: 'italic' },
   vacio: { textAlign: 'center', color: '#718096', marginTop: 60, fontSize: 15 },
 });
