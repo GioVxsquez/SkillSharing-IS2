@@ -97,4 +97,22 @@ public class MaterialService {
         return materialRepository.findById(materialId)
                 .orElseThrow(() -> new RuntimeException("material no encontrado"));
     }
+
+    // eliminar un material del sistema de archivos y de la base de datos
+    @Transactional
+    public void eliminarMaterial(Long materialId, Long instructorId) throws IOException {
+        MaterialEducativo material = materialRepository.findById(materialId)
+                .orElseThrow(() -> new RuntimeException("material no encontrado"));
+
+        if (!material.getSesion().getInstructor().getUsuarioId().equals(instructorId)) {
+            throw new SecurityException("solo el instructor de la sesion puede eliminar materiales");
+        }
+
+        Path rutaArchivo = Paths.get(uploadsDir).resolve(material.getRutaArchivo());
+        if (Files.exists(rutaArchivo)) {
+            Files.delete(rutaArchivo);
+        }
+
+        materialRepository.deleteById(materialId);
+    }
 }

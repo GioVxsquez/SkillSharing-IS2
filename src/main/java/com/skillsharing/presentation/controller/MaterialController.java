@@ -57,4 +57,18 @@ public class MaterialController {
                         "attachment; filename=\"" + material.getNombre() + "\"")
                 .body(recurso);
     }
+
+    // us05: eliminar un material subido (solo el instructor de la sesion puede hacerlo)
+    @DeleteMapping("/{materialId}")
+    public ResponseEntity<ApiResponse<String>> eliminar(
+            @PathVariable Long materialId,
+            Authentication auth) throws Exception {
+
+        Long instructorId = usuarioRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("usuario no encontrado")).getUsuarioId();
+
+        materialService.eliminarMaterial(materialId, instructorId);
+        return ResponseEntity.ok(ApiResponse.exito("material eliminado correctamente", null));
+    }
 }
+
