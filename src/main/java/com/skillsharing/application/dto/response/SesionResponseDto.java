@@ -26,6 +26,10 @@ public class SesionResponseDto {
     private Long instructorId;
     private String instructorNombre;
     private LocalDateTime fechaCreacion;
+    // us09: categoria para filtros del home
+    private String categoria;
+    // us21/us22: habilidad asociada a la sesion
+    private String habilidadNombre;
 
     // conversion desde entidad al dto (patron de mapeo)
     public static SesionResponseDto fromEntity(SesionAprendizaje s) {
@@ -44,6 +48,10 @@ public class SesionResponseDto {
         dto.setLugar(s.getLugar());
         dto.setUbicacion(s.getLugar() != null ? s.getLugar() : s.getLinkSesion());
         dto.setFechaCreacion(s.getFechaCreacion());
+        dto.setCategoria(s.getCategoria());
+        if (s.getHabilidad() != null) {
+            dto.setHabilidadNombre(s.getHabilidad().getNombre());
+        }
         if (s.getInstructor() != null) {
             dto.setInstructorId(s.getInstructor().getUsuarioId());
             dto.setInstructorNombre(s.getInstructor().getNombre());
