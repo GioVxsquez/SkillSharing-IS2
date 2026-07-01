@@ -15,6 +15,7 @@ import PerfilScreen             from '../screens/PerfilScreen';
 import InvitarAsistentesScreen  from '../screens/InvitarAsistentesScreen';
 import NotificacionesScreen     from '../screens/NotificacionesScreen';
 import BuscarInstructoresScreen from '../screens/BuscarInstructoresScreen';
+import SubirMaterialScreen      from '../screens/SubirMaterialScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -58,6 +59,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Perfil"             component={PerfilScreen} />
         <Stack.Screen name="Notificaciones"     component={NotificacionesScreen} />
         <Stack.Screen name="BuscarInstructores" component={BuscarInstructoresScreen} />
+        <Stack.Screen name="SubirMaterial"      component={SubirMaterialScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

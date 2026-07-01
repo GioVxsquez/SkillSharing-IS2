@@ -250,6 +250,14 @@ export default function DetalleSesionScreen({ route, navigation }: any) {
           </TouchableOpacity>
         )}
 
+        {/* US05: boton para que el instructor gestione los materiales de su sesion */}
+        <TouchableOpacity
+          style={[styles.boton, { backgroundColor: '#2D3748', marginTop: 4 }]}
+          onPress={() => navigation.navigate('SubirMaterial', { sesionId: sesion.sesionId, sesionTitulo: sesion.titulo })}
+        >
+          <Text style={styles.botonTexto}>📎 Gestionar materiales</Text>
+        </TouchableOpacity>
+
       </ScrollView>
     </View>
   );
