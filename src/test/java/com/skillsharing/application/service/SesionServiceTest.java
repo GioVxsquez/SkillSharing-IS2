@@ -143,4 +143,30 @@ class SesionServiceTest {
                 sesionService.obtenerDetalle(99L)
         );
     }
+
+    // US09: filtrar por categoria delega al repositorio
+    @Test
+    void filtrarPorCategoria_debeDelegarARepository() {
+        when(sesionRepository.findByCategoriaIgnoreCaseAndEstadoAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
+                eq("Programacion"), eq(EstadoSesion.ACTIVA), eq(TipoSesion.PUBLICA), any(LocalDateTime.class)))
+                .thenReturn(List.of(sesionActiva));
+
+        List<SesionAprendizaje> resultado = sesionService.filtrarPorCategoria("Programacion");
+
+        assertEquals(1, resultado.size());
+        assertEquals("Sesion de Java", resultado.get(0).getTitulo());
+    }
+
+    // US11: filtrar por modalidad delega al repositorio
+    @Test
+    void filtrarPorModalidad_debeDelegarARepository() {
+        when(sesionRepository.findByModalidadAndEstadoAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
+                eq(com.skillsharing.domain.enums.ModalidadSesion.VIRTUAL), eq(EstadoSesion.ACTIVA), eq(TipoSesion.PUBLICA), any(LocalDateTime.class)))
+                .thenReturn(List.of(sesionActiva));
+
+        List<SesionAprendizaje> resultado = sesionService.filtrarPorModalidad(com.skillsharing.domain.enums.ModalidadSesion.VIRTUAL);
+
+        assertEquals(1, resultado.size());
+        assertEquals(5L, resultado.get(0).getSesionId());
+    }
 }
