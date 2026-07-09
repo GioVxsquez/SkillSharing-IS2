@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity, Alert,
   ActivityIndicator, StatusBar, FlatList,
 } from 'react-native';
+import * as DocumentPicker from 'expo-document-picker';
 import { api } from '../api/config';
 
 // US05: Subir material educativo a una sesion
@@ -28,33 +29,39 @@ export default function SubirMaterialScreen({ route, navigation }: any) {
     cargarMateriales();
   }, [sesionId]);
 
-  // US05: el endpoint espera multipart/form-data con un campo "archivo"
-  // En React Native se necesita una librería como react-native-document-picker para
-  // seleccionar archivos del dispositivo. Este flujo simula el proceso con Alert.
-  const handleSimularSubida = () => {
-    Alert.alert(
-      'Subir material',
-      'Para subir un archivo real desde el dispositivo se requiere instalar react-native-document-picker.\n\nEl endpoint disponible es:\nPOST /api/materiales/sesion/' + sesionId + '\nCon campo "archivo" en multipart/form-data.',
-      [
-        { text: 'Entendido', style: 'cancel' },
-        {
-          text: 'Simular subida',
-          onPress: async () => {
-            setSubiendo(true);
-            try {
-              // En produccion aqui iria el FormData con el archivo real del picker
-              // La simulacion solo muestra el flujo esperado
-              Alert.alert(
-                'Flujo real',
-                'FormData con campo "archivo" enviado a POST /api/materiales/sesion/' + sesionId
-              );
-            } finally {
-              setSubiendo(false);
-            }
-          },
-        },
-      ]
-    );
+  // US05: cargar archivo desde el dispositivo
+  const handleSubirDocumento = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'],
+        copyToCacheDirectory: true,
+      });
+
+      if (result.canceled) return;
+
+      const file = result.assets[0];
+      setSubiendo(true);
+
+      const formData = new FormData();
+      formData.append('archivo', {
+        uri: file.uri,
+        name: file.name,
+        type: file.mimeType || 'application/octet-stream',
+      } as any);
+
+      const resp = await api.post(`/materiales/sesion/${sesionId}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      if (resp.data.ok) {
+        Alert.alert('Éxito', 'Material subido correctamente.');
+        cargarMateriales();
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.response?.data?.mensaje || 'No se pudo subir el archivo.');
+    } finally {
+      setSubiendo(false);
+    }
   };
 
   const handleEliminar = (materialId: number, nombre: string) => {
@@ -127,7 +134,7 @@ export default function SubirMaterialScreen({ route, navigation }: any) {
           ListFooterComponent={
             <TouchableOpacity
               style={[styles.botonSubir, subiendo && { opacity: 0.7 }]}
-              onPress={handleSimularSubida}
+              onPress={handleSubirDocumento}
               disabled={subiendo}
             >
               {subiendo

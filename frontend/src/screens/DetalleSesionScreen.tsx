@@ -56,7 +56,16 @@ export default function DetalleSesionScreen({ route, navigation }: any) {
         Alert.alert('Aviso', resp.data.mensaje || 'No se pudo completar la inscripcion.');
       }
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.mensaje || 'Error al inscribirse.');
+      const msj = error.response?.data?.mensaje || 'Error al inscribirse.';
+      if (msj.toLowerCase().includes('cruce') || msj.toLowerCase().includes('horario')) {
+        Alert.alert(
+          '⚠️ Cruce de Horarios',
+          'No puedes inscribirte porque ya tienes otra sesión confirmada que se cruza con este horario.\n\nRevisa tus sesiones en "Mis Sesiones".',
+          [{ text: 'Entendido', style: 'cancel' }]
+        );
+      } else {
+        Alert.alert('Error', msj);
+      }
     } finally {
       setInscribiendo(false);
     }
