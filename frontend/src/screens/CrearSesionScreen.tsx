@@ -5,43 +5,47 @@ import {
 } from 'react-native';
 import { api } from '../api/config';
 
-// HU01, US09: crear una sesion como instructor indicando su categoria
+// HU01: crear una sesion como instructor
+// US09: elegir categoria al crear la sesion
 export default function CrearSesionScreen({ navigation }: any) {
-  const [titulo, setTitulo]           = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [ubicacion, setUbicacion]     = useState('');
-  const [duracion, setDuracion]       = useState('');
-  const [capacidad, setCapacidad]     = useState('');
-  const [fechaSesion, setFecha]       = useState('');
-  const [esPrivada, setEsPrivada]     = useState(false);
-  const [categoria, setCategoria]     = useState('Programacion');
-  const [loading, setLoading]         = useState(false);
+  const [titulo, setTitulo]         = useState('');
+  const [descripcion, setDesc]      = useState('');
+  const [lugar, setLugar]           = useState('');
+  const [capacidad, setCapacidad]   = useState('');
+  const [fechaSesion, setFecha]     = useState('');
+  const [esPrivada, setEsPrivada]   = useState(false);
+  const [categoria, setCategoria]   = useState('Programacion');
+  const [modalidad, setModalidad]   = useState<'VIRTUAL' | 'PRESENCIAL'>('VIRTUAL');
+  const [loading, setLoading]       = useState(false);
 
-  const categorias = ['Programacion', 'Idiomas', 'Cocina', 'Diseno Grafico', 'Matematicas', 'Musica', 'Fotografia', 'Marketing Digital', 'Finanzas'];
+  const categorias = [
+    'Programacion', 'Idiomas', 'Cocina', 'Diseno Grafico',
+    'Matematicas', 'Musica', 'Fotografia', 'Marketing Digital', 'Finanzas',
+  ];
 
   const handleCrear = async () => {
     if (!titulo.trim()) {
       Alert.alert('Campo requerido', 'El titulo de la sesion es obligatorio.');
       return;
     }
+    if (!fechaSesion.trim()) {
+      Alert.alert('Campo requerido', 'La fecha de la sesion es obligatoria.');
+      return;
+    }
 
     setLoading(true);
     try {
-      const fechaBase = fechaSesion
-        ? new Date(`${fechaSesion}T18:00:00`).toISOString()
-        : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
       const payload = {
-        titulo: titulo.trim(),
-        descripcion: descripcion.trim(),
-        fechaSesion: fechaBase,
-        modalidad: ubicacion.trim().toLowerCase().includes('aula') ? 'PRESENCIAL' : 'VIRTUAL',
+        titulo:          titulo.trim(),
+        descripcion:     descripcion.trim(),
+        fechaSesion:     new Date(`${fechaSesion}T18:00:00`).toISOString(),
+        modalidad:       modalidad,
         maxParticipantes: capacidad ? parseInt(capacidad, 10) : 20,
-        tipo: esPrivada ? 'PRIVADA' : 'PUBLICA',
-        privada: esPrivada,
-        linkSesion: ubicacion.trim(),
-        lugar: ubicacion.trim(),
-        categoria: categoria,
+        tipo:            esPrivada ? 'PRIVADA' : 'PUBLICA',
+        privada:         esPrivada,
+        linkSesion:      modalidad === 'VIRTUAL'     ? lugar.trim() : null,
+        lugar:           modalidad === 'PRESENCIAL'  ? lugar.trim() : null,
+        categoria:       categoria,
       };
 
       const resp = await api.post('/sesiones', payload);
@@ -55,6 +59,7 @@ export default function CrearSesionScreen({ navigation }: any) {
         Alert.alert('Error', resp.data.mensaje || 'No se pudo crear la sesion.');
       }
     } catch (error: any) {
+      // US25: si hay cruce de horario el backend devuelve el mensaje
       Alert.alert('Error', error.response?.data?.mensaje || 'Error al crear la sesion.');
     } finally {
       setLoading(false);
@@ -72,6 +77,8 @@ export default function CrearSesionScreen({ navigation }: any) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+
+        {/* Titulo */}
         <View style={styles.campo}>
           <Text style={styles.label}>Titulo *</Text>
           <TextInput
@@ -83,6 +90,7 @@ export default function CrearSesionScreen({ navigation }: any) {
           />
         </View>
 
+        {/* Descripcion */}
         <View style={styles.campo}>
           <Text style={styles.label}>Descripcion</Text>
           <TextInput
@@ -90,49 +98,69 @@ export default function CrearSesionScreen({ navigation }: any) {
             placeholder="Describe de que trata la sesion..."
             placeholderTextColor="#B0B8C1"
             value={descripcion}
-            onChangeText={setDescripcion}
+            onChangeText={setDesc}
             multiline
             numberOfLines={4}
           />
         </View>
 
-        {/* Selector de Categoría */}
+        {/* Categoria - US09 */}
         <View style={styles.campo}>
           <Text style={styles.label}>Categoría</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollCategorias}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
             {categorias.map((cat) => (
               <TouchableOpacity
                 key={cat}
-                style={[styles.categoryChip, categoria === cat && styles.categoryChipActive]}
+                style={[styles.chip, categoria === cat && styles.chipActivo]}
                 onPress={() => setCategoria(cat)}
               >
-                <Text style={[styles.categoryChipText, categoria === cat && styles.categoryChipTextActive]}>{cat}</Text>
+                <Text style={[styles.chipTexto, categoria === cat && styles.chipTextoActivo]}>{cat}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
 
+        {/* Modalidad - US11 */}
         <View style={styles.campo}>
-          <Text style={styles.label}>Ubicacion / Enlace</Text>
+          <Text style={styles.label}>Modalidad</Text>
+          <View style={styles.modalidadRow}>
+            <TouchableOpacity
+              style={[styles.modalidadBtn, modalidad === 'VIRTUAL' && styles.modalidadBtnActivo]}
+              onPress={() => setModalidad('VIRTUAL')}
+            >
+              <Text style={[styles.modalidadBtnTexto, modalidad === 'VIRTUAL' && styles.modalidadBtnTextoActivo]}>🖥️ Virtual</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modalidadBtn, modalidad === 'PRESENCIAL' && styles.modalidadBtnActivo]}
+              onPress={() => setModalidad('PRESENCIAL')}
+            >
+              <Text style={[styles.modalidadBtnTexto, modalidad === 'PRESENCIAL' && styles.modalidadBtnTextoActivo]}>🏫 Presencial</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Link o lugar segun modalidad */}
+        <View style={styles.campo}>
+          <Text style={styles.label}>{modalidad === 'VIRTUAL' ? 'Enlace de la sesion' : 'Lugar / Aula'}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ej: Aula 302 o meet.google.com/..."
+            placeholder={modalidad === 'VIRTUAL' ? 'meet.google.com/...' : 'Ej: Aula 302, Piso 3'}
             placeholderTextColor="#B0B8C1"
-            value={ubicacion}
-            onChangeText={setUbicacion}
+            value={lugar}
+            onChangeText={setLugar}
           />
         </View>
 
+        {/* Fecha y capacidad */}
         <View style={styles.row}>
           <View style={[styles.campo, { flex: 1, marginRight: 8 }]}>
-            <Text style={styles.label}>Duracion (min)</Text>
+            <Text style={styles.label}>Fecha (AAAA-MM-DD) *</Text>
             <TextInput
               style={styles.input}
-              placeholder="60"
+              placeholder="2026-08-15"
               placeholderTextColor="#B0B8C1"
-              value={duracion}
-              onChangeText={setDuracion}
-              keyboardType="number-pad"
+              value={fechaSesion}
+              onChangeText={setFecha}
             />
           </View>
           <View style={[styles.campo, { flex: 1 }]}>
@@ -148,17 +176,7 @@ export default function CrearSesionScreen({ navigation }: any) {
           </View>
         </View>
 
-        <View style={styles.campo}>
-          <Text style={styles.label}>Fecha (AAAA-MM-DD)</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="2026-06-15"
-            placeholderTextColor="#B0B8C1"
-            value={fechaSesion}
-            onChangeText={setFecha}
-          />
-        </View>
-
+        {/* Sesion privada */}
         <View style={styles.toggleRow}>
           <View>
             <Text style={styles.label}>Sesion privada</Text>
@@ -191,11 +209,16 @@ const styles = StyleSheet.create({
   input: { backgroundColor: '#FFFFFF', borderWidth: 1.5, borderColor: '#E2E8F0', borderRadius: 10, paddingVertical: 13, paddingHorizontal: 16, fontSize: 15, color: '#1A202C' },
   textArea: { minHeight: 100, textAlignVertical: 'top' },
   row: { flexDirection: 'row' },
-  scrollCategorias: { gap: 8, paddingVertical: 4 },
-  categoryChip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, backgroundColor: '#E2E8F0', marginRight: 8 },
-  categoryChipActive: { backgroundColor: '#1B3A6B' },
-  categoryChipText: { fontSize: 13, color: '#4A5568', fontWeight: '600' },
-  categoryChipTextActive: { color: '#FFFFFF' },
+  chips: { gap: 8, paddingVertical: 4 },
+  chip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, backgroundColor: '#E2E8F0', marginRight: 8 },
+  chipActivo: { backgroundColor: '#1B3A6B' },
+  chipTexto: { fontSize: 13, color: '#4A5568', fontWeight: '600' },
+  chipTextoActivo: { color: '#FFFFFF' },
+  modalidadRow: { flexDirection: 'row', gap: 10 },
+  modalidadBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, borderWidth: 1.5, borderColor: '#E2E8F0', alignItems: 'center', backgroundColor: '#FFFFFF' },
+  modalidadBtnActivo: { borderColor: '#1B3A6B', backgroundColor: '#EBF4FF' },
+  modalidadBtnTexto: { fontSize: 14, fontWeight: '600', color: '#718096' },
+  modalidadBtnTextoActivo: { color: '#1B3A6B' },
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 12, padding: 16, marginBottom: 24, borderWidth: 1.5, borderColor: '#E2E8F0' },
   toggleHint: { fontSize: 12, color: '#718096', marginTop: 2 },
   boton: { backgroundColor: '#1B3A6B', paddingVertical: 16, borderRadius: 12, alignItems: 'center', elevation: 5 },
