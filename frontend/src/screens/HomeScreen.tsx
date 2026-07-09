@@ -6,12 +6,12 @@ import {
 import { api } from '../api/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// US03, US09, US11: Visualizar eventos públicos con buscador y filtros
+// US03, US09, US11
 export default function HomeScreen({ navigation }: any) {
-  const [sesiones, setSesiones]     = useState<any[]>([]);
-  const [loading, setLoading]       = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [sesiones, setSesiones]           = useState<any[]>([]);
+  const [loading, setLoading]             = useState(true);
+  const [refreshing, setRefreshing]       = useState(false);
+  const [searchQuery, setSearchQuery]     = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedModalidad, setSelectedModalidad] = useState<string | null>(null);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
@@ -35,7 +35,6 @@ export default function HomeScreen({ navigation }: any) {
       const resp = await api.get('/notificaciones/no-vistas/count');
       setUnreadNotifications(resp.data.data?.total || 0);
     } catch {
-      // Ignorar silenciosamente si falla el contador
     }
   }, []);
 
@@ -44,7 +43,6 @@ export default function HomeScreen({ navigation }: any) {
     cargarContadorNotificaciones();
   }, [cargarSesiones, cargarContadorNotificaciones]);
 
-  // Recargar al regresar a la pantalla
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       cargarSesiones();
@@ -65,10 +63,7 @@ export default function HomeScreen({ navigation }: any) {
     setSearchQuery(query);
     setSelectedCategory(null);
     setSelectedModalidad(null);
-    if (query.trim() === '') {
-      cargarSesiones();
-      return;
-    }
+    if (query.trim() === '') { cargarSesiones(); return; }
     try {
       setLoading(true);
       const resp = await api.get(`/sesiones/buscar?q=${query}`);
@@ -84,10 +79,7 @@ export default function HomeScreen({ navigation }: any) {
     setSelectedCategory(cat);
     setSelectedModalidad(null);
     setSearchQuery('');
-    if (!cat) {
-      cargarSesiones();
-      return;
-    }
+    if (!cat) { cargarSesiones(); return; }
     try {
       setLoading(true);
       const resp = await api.get(`/sesiones/categoria/${cat}`);
@@ -103,10 +95,7 @@ export default function HomeScreen({ navigation }: any) {
     setSelectedModalidad(mod);
     setSelectedCategory(null);
     setSearchQuery('');
-    if (!mod) {
-      cargarSesiones();
-      return;
-    }
+    if (!mod) { cargarSesiones(); return; }
     try {
       setLoading(true);
       const resp = await api.get(`/sesiones/modalidad/${mod}`);
@@ -118,181 +107,283 @@ export default function HomeScreen({ navigation }: any) {
     }
   };
 
+  const estadoColor: Record<string, string> = {
+    ACTIVA: '#22C55E',
+    PENDIENTE: '#F59E0B',
+    CANCELADA: '#EF4444',
+    FINALIZADA: '#8898AA',
+  };
+
   const renderSesion = ({ item }: any) => (
     <TouchableOpacity
       style={styles.card}
       onPress={() => navigation.navigate('DetalleSesion', { sesionId: item.sesionId })}
-      activeOpacity={0.8}
+      activeOpacity={0.85}
     >
-      <View style={styles.cardHeader}>
+      {/* Franja de acento lateral */}
+      <View style={[styles.cardAccent, { backgroundColor: item.tipo === 'PUBLICA' ? '#F97316' : '#6366F1' }]} />
+      <View style={styles.cardBody}>
+        <View style={styles.cardTopRow}>
+          <View style={[styles.tipoBadge, { backgroundColor: item.tipo === 'PUBLICA' ? '#FFF0E6' : '#EEEEFF' }]}>
+            <Text style={[styles.tipoBadgeTexto, { color: item.tipo === 'PUBLICA' ? '#F97316' : '#6366F1' }]}>
+              {item.tipo === 'PUBLICA' ? 'Pública' : 'Privada'}
+            </Text>
+          </View>
+          {item.modalidad && (
+            <View style={styles.modalidadBadge}>
+              <Text style={styles.modalidadTexto}>{item.modalidad}</Text>
+            </View>
+          )}
+        </View>
         <Text style={styles.cardTitulo} numberOfLines={2}>{item.titulo}</Text>
-        <View style={[styles.badge, item.tipo === 'PUBLICA' ? styles.badgePublica : styles.badgePrivada]}>
-          <Text style={styles.badgeTexto}>{item.tipo}</Text>
+        {item.categoria && <Text style={styles.cardCategoria}>{item.categoria}</Text>}
+        <View style={styles.cardMeta}>
+          <Text style={styles.cardMetaTexto}>
+            {item.instructorNombre || 'Instructor'}
+          </Text>
+          <Text style={styles.cardMetaSep}>·</Text>
+          <Text style={styles.cardMetaTexto}>
+            {item.fechaSesion ? new Date(item.fechaSesion).toLocaleDateString('es-PE', { day: '2-digit', month: 'short' }) : 'Por confirmar'}
+          </Text>
         </View>
       </View>
-      <Text style={styles.cardInstructor}>👤 {item.instructorNombre || 'Instructor'}</Text>
-      <View style={styles.row}>
-        <Text style={styles.cardFecha}>📅 {item.fechaSesion ? new Date(item.fechaSesion).toLocaleDateString('es-PE') : 'Por confirmar'}</Text>
-        <View style={[styles.modalidadBadge, item.modalidad === 'VIRTUAL' ? styles.badgeVirtual : styles.badgePresencial]}>
-          <Text style={styles.modalidadTexto}>{item.modalidad}</Text>
-        </View>
-      </View>
-      {item.categoria ? (
-        <Text style={styles.cardCategoria}>🏷️ Categoría: {item.categoria}</Text>
-      ) : null}
-      {item.descripcion ? (
-        <Text style={styles.cardDesc} numberOfLines={2}>{item.descripcion}</Text>
-      ) : null}
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1B3A6B" />
+      <StatusBar barStyle="light-content" backgroundColor="#0F1C36" />
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitulo}>SkillSharing</Text>
-        <View style={styles.headerAcciones}>
-          <TouchableOpacity onPress={() => navigation.navigate('Notificaciones')} style={styles.headerBtn}>
-            <Text style={styles.headerBtnTexto}>Alertas {unreadNotifications > 0 ? `(${unreadNotifications})` : ''}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('BuscarInstructores')} style={styles.headerBtn}>
-            <Text style={styles.headerBtnTexto}>Instructores</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('MisSesiones')} style={styles.headerBtn}>
-            <Text style={styles.headerBtnTexto}>Mis Sesiones</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Perfil')} style={styles.headerBtn}>
-            <Text style={styles.headerBtnTexto}>Perfil</Text>
+        <View>
+          <Text style={styles.headerMarca}>SkillSharing</Text>
+          <Text style={styles.headerSub}>Descubre qué aprender hoy</Text>
+        </View>
+        <View style={styles.headerAcc}>
+          <TouchableOpacity style={styles.notifBtn} onPress={() => navigation.navigate('Notificaciones')}>
+            <Text style={styles.notifBtnTexto}>!</Text>
+            {unreadNotifications > 0 && (
+              <View style={styles.notifBadge}>
+                <Text style={styles.notifBadgeTexto}>{unreadNotifications}</Text>
+              </View>
+            )}
           </TouchableOpacity>
           <TouchableOpacity onPress={handleLogout}>
-            <Text style={[styles.headerBtnTexto, { color: '#FFD700' }]}>Salir</Text>
+            <Text style={styles.salirTexto}>Salir</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Buscador */}
-      <View style={styles.searchContainer}>
+      <View style={styles.searchWrap}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Buscar sesión por título..."
+          placeholder="Buscar sesión..."
           value={searchQuery}
           onChangeText={buscarSesiones}
-          placeholderTextColor="#718096"
+          placeholderTextColor="#8898AA"
         />
       </View>
 
-      {/* Filtros de Modalidad */}
-      <View style={styles.filterSection}>
-        <Text style={styles.filterLabel}>Modalidad:</Text>
-        <View style={styles.row}>
+      {/* Filtros modalidad */}
+      <View style={styles.filtrosRow}>
+        {[null, 'VIRTUAL', 'PRESENCIAL'].map((mod) => (
           <TouchableOpacity
-            style={[styles.filterChip, selectedModalidad === null && styles.filterChipActive]}
-            onPress={() => filtrarModalidad(null)}
+            key={String(mod)}
+            style={[styles.filterChip, selectedModalidad === mod && styles.filterChipActive]}
+            onPress={() => filtrarModalidad(mod)}
           >
-            <Text style={[styles.filterChipText, selectedModalidad === null && styles.filterChipTextActive]}>Todas</Text>
+            <Text style={[styles.filterChipText, selectedModalidad === mod && styles.filterChipTextActive]}>
+              {mod === null ? 'Todas' : mod === 'VIRTUAL' ? 'Virtual' : 'Presencial'}
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.filterChip, selectedModalidad === 'VIRTUAL' && styles.filterChipActive]}
-            onPress={() => filtrarModalidad('VIRTUAL')}
-          >
-            <Text style={[styles.filterChipText, selectedModalidad === 'VIRTUAL' && styles.filterChipTextActive]}>Virtual</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.filterChip, selectedModalidad === 'PRESENCIAL' && styles.filterChipActive]}
-            onPress={() => filtrarModalidad('PRESENCIAL')}
-          >
-            <Text style={[styles.filterChipText, selectedModalidad === 'PRESENCIAL' && styles.filterChipTextActive]}>Presencial</Text>
-          </TouchableOpacity>
-        </View>
+        ))}
       </View>
 
-      {/* Filtros de Categorías */}
-      <View style={styles.categorySection}>
-        <Text style={styles.filterLabel}>Categoría:</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollCategorias}>
+      {/* Filtros categorías */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriaScroll}>
+        {[null, ...categorias].map((cat) => (
           <TouchableOpacity
-            style={[styles.categoryChip, selectedCategory === null && styles.categoryChipActive]}
-            onPress={() => filtrarCategoria(null)}
+            key={String(cat)}
+            style={[styles.catChip, selectedCategory === cat && styles.catChipActive]}
+            onPress={() => filtrarCategoria(cat)}
           >
-            <Text style={[styles.categoryChipText, selectedCategory === null && styles.categoryChipTextActive]}>Todas</Text>
+            <Text style={[styles.catChipTexto, selectedCategory === cat && styles.catChipTextoActive]}>
+              {cat === null ? 'Todas' : cat}
+            </Text>
           </TouchableOpacity>
-          {categorias.map((cat) => (
-            <TouchableOpacity
-              key={cat}
-              style={[styles.categoryChip, selectedCategory === cat && styles.categoryChipActive]}
-              onPress={() => filtrarCategoria(cat)}
-            >
-              <Text style={[styles.categoryChipText, selectedCategory === cat && styles.categoryChipTextActive]}>{cat}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+        ))}
+      </ScrollView>
 
-      <Text style={styles.subtitulo}>Sesiones disponibles</Text>
+      <Text style={styles.seccionLabel}>
+        {sesiones.length > 0 ? `${sesiones.length} sesiones disponibles` : 'Sesiones disponibles'}
+      </Text>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#1B3A6B" style={{ marginTop: 40 }} />
+        <ActivityIndicator size="large" color="#F97316" style={{ marginTop: 40 }} />
       ) : (
         <FlatList
           data={sesiones}
           keyExtractor={(item) => String(item.sesionId)}
           renderItem={renderSesion}
           contentContainerStyle={styles.lista}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); cargarSesiones(); cargarContadorNotificaciones(); }} colors={['#1B3A6B']} />}
-          ListEmptyComponent={<Text style={styles.vacio}>No hay sesiones disponibles aún.</Text>}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); cargarSesiones(); cargarContadorNotificaciones(); }} colors={['#F97316']} />}
+          ListEmptyComponent={<Text style={styles.vacio}>Todavía no hay sesiones publicadas.</Text>}
         />
       )}
 
-      {/* FAB - Crear sesión */}
-      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('CrearSesion')}>
-        <Text style={styles.fabTexto}>+</Text>
-      </TouchableOpacity>
+      {/* Bottom Nav */}
+      <View style={styles.bottomNav}>
+        <TouchableOpacity style={styles.navItem} onPress={() => {}}>
+          <View style={styles.navDot} />
+          <Text style={[styles.navTexto, { color: '#F97316' }]}>Inicio</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('MisSesiones')}>
+          <Text style={styles.navTexto}>Mis sesiones</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.fabNav} onPress={() => navigation.navigate('CrearSesion')}>
+          <Text style={styles.fabNavTexto}>+</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('BuscarInstructores')}>
+          <Text style={styles.navTexto}>Instructores</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Perfil')}>
+          <Text style={styles.navTexto}>Perfil</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F9FC' },
-  header: { backgroundColor: '#1B3A6B', paddingTop: 48, paddingBottom: 16, paddingHorizontal: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
-  headerTitulo: { color: '#FFD700', fontSize: 20, fontWeight: '800', letterSpacing: 1 },
-  headerAcciones: { flexDirection: 'row', gap: 10 },
-  headerBtn: {},
-  headerBtnTexto: { color: '#C8D8F0', fontSize: 12, fontWeight: '600' },
-  subtitulo: { fontSize: 16, fontWeight: '700', color: '#1B3A6B', marginHorizontal: 16, marginTop: 12, marginBottom: 8 },
-  searchContainer: { padding: 12, backgroundColor: '#FFFFFF', borderBottomWidth: 1, borderBottomColor: '#E2E8F0' },
-  searchInput: { height: 40, backgroundColor: '#F1F5F9', borderRadius: 8, paddingHorizontal: 12, color: '#1A202C' },
-  filterSection: { paddingHorizontal: 16, paddingTop: 10, backgroundColor: '#FFFFFF' },
-  categorySection: { paddingHorizontal: 16, paddingVertical: 10, backgroundColor: '#FFFFFF', borderBottomWidth: 1, borderBottomColor: '#E2E8F0' },
-  filterLabel: { fontSize: 12, fontWeight: '700', color: '#718096', marginBottom: 6 },
-  row: { flexDirection: 'row', gap: 8, alignItems: 'center' },
-  scrollCategorias: { gap: 8, paddingRight: 16 },
-  filterChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, backgroundColor: '#F1F5F9' },
-  filterChipActive: { backgroundColor: '#1B3A6B' },
-  filterChipText: { fontSize: 12, color: '#4A5568', fontWeight: '600' },
+  container: { flex: 1, backgroundColor: '#F0F4F8' },
+  header: {
+    backgroundColor: '#0F1C36',
+    paddingTop: 52,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  headerMarca: { color: '#F97316', fontSize: 22, fontWeight: '900', letterSpacing: 0.5 },
+  headerSub: { color: '#8898AA', fontSize: 12, marginTop: 2 },
+  headerAcc: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  notifBtn: {
+    width: 36, height: 36, borderRadius: 12,
+    backgroundColor: '#1A2E50',
+    justifyContent: 'center', alignItems: 'center',
+  },
+  notifBtnTexto: { color: '#FFFFFF', fontSize: 18, fontWeight: '700', lineHeight: 22 },
+  notifBadge: {
+    position: 'absolute', top: -4, right: -4,
+    backgroundColor: '#F97316', borderRadius: 10,
+    width: 18, height: 18, justifyContent: 'center', alignItems: 'center',
+  },
+  notifBadgeTexto: { color: '#fff', fontSize: 10, fontWeight: '800' },
+  salirTexto: { color: '#8898AA', fontSize: 13, fontWeight: '600' },
+  searchWrap: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#0F1C36',
+  },
+  searchInput: {
+    backgroundColor: '#1A2E50',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    color: '#FFFFFF',
+    fontSize: 14,
+  },
+  filtrosRow: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8EDF2',
+  },
+  filterChip: {
+    paddingHorizontal: 14, paddingVertical: 7,
+    borderRadius: 20, backgroundColor: '#F0F4F8',
+    borderWidth: 1.5, borderColor: '#E2E8F0',
+  },
+  filterChipActive: { backgroundColor: '#0F1C36', borderColor: '#0F1C36' },
+  filterChipText: { fontSize: 12, color: '#4A5568', fontWeight: '700' },
   filterChipTextActive: { color: '#FFFFFF' },
-  categoryChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, backgroundColor: '#F1F5F9' },
-  categoryChipActive: { backgroundColor: '#1B3A6B' },
-  categoryChipText: { fontSize: 12, color: '#4A5568', fontWeight: '600' },
-  categoryChipTextActive: { color: '#FFFFFF' },
-  lista: { paddingHorizontal: 16, paddingBottom: 80, paddingTop: 8 },
-  card: { backgroundColor: '#FFFFFF', borderRadius: 14, padding: 16, marginBottom: 14, shadowColor: '#1B3A6B', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 6, elevation: 3 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 },
-  cardTitulo: { fontSize: 16, fontWeight: '700', color: '#1A202C', flex: 1, marginRight: 8 },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  badgePublica: { backgroundColor: '#E6F4FF' },
-  badgePrivada: { backgroundColor: '#FFF3E0' },
-  badgeTexto: { fontSize: 11, fontWeight: '700', color: '#1B3A6B' },
-  cardInstructor: { fontSize: 13, color: '#4A5568', marginBottom: 4 },
-  cardFecha: { fontSize: 13, color: '#4A5568' },
-  cardCategoria: { fontSize: 12, color: '#1B3A6B', fontWeight: '600', marginTop: 4, marginBottom: 6 },
-  modalidadBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 },
-  badgeVirtual: { backgroundColor: '#E8F5E9' },
-  badgePresencial: { backgroundColor: '#ECEFF1' },
-  modalidadTexto: { fontSize: 11, fontWeight: '700', color: '#2E7D32' },
-  cardDesc: { fontSize: 13, color: '#718096', lineHeight: 18, marginTop: 4 },
-  vacio: { textAlign: 'center', color: '#718096', marginTop: 60, fontSize: 15 },
-  fab: { position: 'absolute', bottom: 24, right: 24, width: 56, height: 56, borderRadius: 28, backgroundColor: '#1B3A6B', justifyContent: 'center', alignItems: 'center', shadowColor: '#1B3A6B', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
-  fabTexto: { color: '#FFD700', fontSize: 28, fontWeight: '300', lineHeight: 32 },
+  categoriaScroll: { paddingHorizontal: 16, paddingVertical: 10, gap: 8 },
+  catChip: {
+    paddingHorizontal: 14, paddingVertical: 7,
+    borderRadius: 20, backgroundColor: '#FFFFFF',
+    borderWidth: 1.5, borderColor: '#E2E8F0',
+  },
+  catChipActive: { backgroundColor: '#F97316', borderColor: '#F97316' },
+  catChipTexto: { fontSize: 12, color: '#4A5568', fontWeight: '600' },
+  catChipTextoActive: { color: '#FFFFFF', fontWeight: '700' },
+  seccionLabel: {
+    fontSize: 13, fontWeight: '700', color: '#8898AA',
+    marginHorizontal: 16, marginTop: 4, marginBottom: 2,
+  },
+  lista: { paddingHorizontal: 16, paddingBottom: 100, paddingTop: 8 },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    marginBottom: 12,
+    flexDirection: 'row',
+    overflow: 'hidden',
+    shadowColor: '#0F1C36',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  cardAccent: { width: 5 },
+  cardBody: { flex: 1, padding: 16 },
+  cardTopRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  tipoBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
+  tipoBadgeTexto: { fontSize: 11, fontWeight: '800' },
+  modalidadBadge: {
+    paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20,
+    backgroundColor: '#F0F4F8',
+  },
+  modalidadTexto: { fontSize: 11, color: '#4A5568', fontWeight: '700' },
+  cardTitulo: { fontSize: 15, fontWeight: '800', color: '#0F1C36', lineHeight: 21, marginBottom: 4 },
+  cardCategoria: { fontSize: 12, color: '#F97316', fontWeight: '700', marginBottom: 8 },
+  cardMeta: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  cardMetaTexto: { fontSize: 12, color: '#8898AA', fontWeight: '600' },
+  cardMetaSep: { color: '#CBD5E0', fontSize: 12 },
+  vacio: { textAlign: 'center', color: '#8898AA', marginTop: 60, fontSize: 15 },
+  bottomNav: {
+    position: 'absolute', bottom: 0, left: 0, right: 0,
+    height: 72,
+    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    borderTopWidth: 1,
+    borderTopColor: '#E8EDF2',
+    paddingBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  navItem: { alignItems: 'center', flex: 1 },
+  navDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: '#F97316', marginBottom: 2 },
+  navTexto: { fontSize: 11, color: '#8898AA', fontWeight: '700' },
+  fabNav: {
+    width: 54, height: 54, borderRadius: 27,
+    backgroundColor: '#F97316',
+    justifyContent: 'center', alignItems: 'center',
+    marginBottom: 10,
+    shadowColor: '#F97316',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  fabNavTexto: { color: '#FFFFFF', fontSize: 28, fontWeight: '300', lineHeight: 32 },
 });

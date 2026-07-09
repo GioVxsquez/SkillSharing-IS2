@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   Alert, ActivityIndicator, KeyboardAvoidingView, Platform,
-  ScrollView, Image, StatusBar,
+  ScrollView, StatusBar,
 } from 'react-native';
 import { api } from '../api/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,10 +11,12 @@ export default function LoginScreen({ navigation }: any) {
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading]   = useState(false);
+  const [focusEmail, setFocusEmail]   = useState(false);
+  const [focusPass, setFocusPass]     = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Campos incompletos', 'Por favor ingresa tu email y contraseña.');
+      Alert.alert('Faltan datos', 'Ingresa tu correo y contraseña para continuar.');
       return;
     }
     setLoading(true);
@@ -24,10 +26,10 @@ export default function LoginScreen({ navigation }: any) {
         await AsyncStorage.setItem('userToken', response.data.data.token);
         navigation.replace('Home');
       } else {
-        Alert.alert('Error', response.data.mensaje || 'Error al iniciar sesión.');
+        Alert.alert('Error', response.data.mensaje || 'No se pudo iniciar sesión.');
       }
     } catch (error: any) {
-      const msg = error.response?.data?.mensaje || 'Error al conectar con el servidor.';
+      const msg = error.response?.data?.mensaje || 'No se pudo conectar al servidor.';
       Alert.alert('Error', msg);
     } finally {
       setLoading(false);
@@ -39,61 +41,70 @@ export default function LoginScreen({ navigation }: any) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <StatusBar barStyle="light-content" backgroundColor="#0F1C36" />
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
 
-        {/* Logo */}
-        <View style={styles.logoContainer}>
-          <Image source={require('../../assets/logo.png')} style={styles.logo} resizeMode="contain" />
+        {/* Bloque superior con el nombre */}
+        <View style={styles.topBlock}>
+          <View style={styles.logoBadge}>
+            <Text style={styles.logoBadgeLetra}>S</Text>
+          </View>
+          <Text style={styles.appNombre}>SkillSharing</Text>
+          <Text style={styles.appSlogan}>Aprende de los que saben</Text>
         </View>
 
-        <Text style={styles.titulo}>Inicia Sesión</Text>
+        {/* Formulario */}
+        <View style={styles.formCard}>
+          <Text style={styles.formTitulo}>Bienvenido de vuelta</Text>
+          <Text style={styles.formSubtitulo}>Inicia sesión para continuar</Text>
 
-        {/* Campos */}
-        <View style={styles.campo}>
-          <Text style={styles.label}>Correo Electrónico</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="correo@ejemplo.com"
-            placeholderTextColor="#B0B8C1"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-        </View>
+          <View style={styles.campo}>
+            <Text style={styles.label}>Correo</Text>
+            <TextInput
+              style={[styles.input, focusEmail && styles.inputFocus]}
+              placeholder="tu@correo.com"
+              placeholderTextColor="#8898AA"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              onFocus={() => setFocusEmail(true)}
+              onBlur={() => setFocusEmail(false)}
+            />
+          </View>
 
-        <View style={styles.campo}>
-          <Text style={styles.label}>Contraseña</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="••••••••"
-            placeholderTextColor="#B0B8C1"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-        </View>
+          <View style={styles.campo}>
+            <Text style={styles.label}>Contraseña</Text>
+            <TextInput
+              style={[styles.input, focusPass && styles.inputFocus]}
+              placeholder="••••••••"
+              placeholderTextColor="#8898AA"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              onFocus={() => setFocusPass(true)}
+              onBlur={() => setFocusPass(false)}
+            />
+          </View>
 
-        {/* Botón principal */}
-        <TouchableOpacity
-          style={[styles.botonPrincipal, loading && styles.botonDeshabilitado]}
-          onPress={handleLogin}
-          disabled={loading}
-          activeOpacity={0.85}
-        >
-          {loading
-            ? <ActivityIndicator color="#fff" />
-            : <Text style={styles.botonTexto}>Iniciar Sesión</Text>}
-        </TouchableOpacity>
-
-        {/* Enlace a Registro */}
-        <View style={styles.pie}>
-          <Text style={styles.pieTexto}>¿No tienes cuenta? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.enlace}>Regístrate</Text>
+          <TouchableOpacity
+            style={[styles.boton, loading && styles.botonDeshabilitado]}
+            onPress={handleLogin}
+            disabled={loading}
+            activeOpacity={0.85}
+          >
+            {loading
+              ? <ActivityIndicator color="#fff" />
+              : <Text style={styles.botonTexto}>Entrar</Text>}
           </TouchableOpacity>
+
+          <View style={styles.pie}>
+            <Text style={styles.pieTexto}>¿Aun no tienes cuenta? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+              <Text style={styles.enlace}>Regístrate</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
       </ScrollView>
@@ -102,84 +113,69 @@ export default function LoginScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  container: { flex: 1, backgroundColor: '#0F1C36' },
+  scroll: { flexGrow: 1 },
+  topBlock: {
+    alignItems: 'center',
+    paddingTop: 80,
+    paddingBottom: 40,
+  },
+  logoBadge: {
+    width: 72,
+    height: 72,
+    borderRadius: 22,
+    backgroundColor: '#F97316',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    shadowColor: '#F97316',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  logoBadgeLetra: { color: '#FFFFFF', fontSize: 34, fontWeight: '900' },
+  appNombre: { color: '#FFFFFF', fontSize: 28, fontWeight: '800', letterSpacing: 1 },
+  appSlogan: { color: '#8898AA', fontSize: 14, marginTop: 6 },
+  formCard: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    paddingHorizontal: 28,
+    paddingTop: 36,
+    paddingBottom: 40,
   },
-  scroll: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-    paddingVertical: 40,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 36,
-  },
-  logo: {
-    width: 200,
-    height: 70,
-  },
-  titulo: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#1B3A6B',
-    marginBottom: 28,
-    textAlign: 'center',
-  },
-  campo: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#4A5568',
-    marginBottom: 8,
-    letterSpacing: 0.3,
-  },
+  formTitulo: { fontSize: 24, fontWeight: '800', color: '#0F1C36', marginBottom: 4 },
+  formSubtitulo: { fontSize: 14, color: '#8898AA', marginBottom: 28 },
+  campo: { marginBottom: 18 },
+  label: { fontSize: 12, fontWeight: '700', color: '#4A5568', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
   input: {
     backgroundColor: '#F7F9FC',
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
-    borderRadius: 10,
+    borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
     fontSize: 15,
-    color: '#1A202C',
+    color: '#0F1C36',
   },
-  botonPrincipal: {
-    backgroundColor: '#1B3A6B',
+  inputFocus: { borderColor: '#F97316', backgroundColor: '#FFFAF7' },
+  boton: {
+    backgroundColor: '#F97316',
     paddingVertical: 16,
-    borderRadius: 10,
+    borderRadius: 14,
     alignItems: 'center',
-    marginTop: 10,
-    shadowColor: '#1B3A6B',
+    marginTop: 8,
+    shadowColor: '#F97316',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 6,
   },
-  botonDeshabilitado: {
-    opacity: 0.7,
-  },
-  botonTexto: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  pie: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 32,
-  },
-  pieTexto: {
-    color: '#718096',
-    fontSize: 14,
-  },
-  enlace: {
-    color: '#1B3A6B',
-    fontSize: 14,
-    fontWeight: '700',
-  },
+  botonDeshabilitado: { opacity: 0.7 },
+  botonTexto: { color: '#FFFFFF', fontSize: 16, fontWeight: '800', letterSpacing: 0.5 },
+  pie: { flexDirection: 'row', justifyContent: 'center', marginTop: 28 },
+  pieTexto: { color: '#718096', fontSize: 14 },
+  enlace: { color: '#F97316', fontSize: 14, fontWeight: '700' },
 });
