@@ -61,7 +61,7 @@ export default function NotificacionesScreen({ navigation }: any) {
         {!item.visto && <View style={styles.dot} />}
       </View>
       <Text style={styles.cardFecha}>
-        📅 {item.fechaCreacion ? new Date(item.fechaCreacion).toLocaleString('es-PE') : 'Hace un momento'}
+        {item.fechaCreacion ? new Date(item.fechaCreacion).toLocaleString('es-PE') : 'Hace un momento'}
       </Text>
     </TouchableOpacity>
   );

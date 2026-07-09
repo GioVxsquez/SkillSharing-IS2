@@ -128,13 +128,13 @@ export default function CrearSesionScreen({ navigation }: any) {
               style={[styles.modalidadBtn, modalidad === 'VIRTUAL' && styles.modalidadBtnActivo]}
               onPress={() => setModalidad('VIRTUAL')}
             >
-              <Text style={[styles.modalidadBtnTexto, modalidad === 'VIRTUAL' && styles.modalidadBtnTextoActivo]}>🖥️ Virtual</Text>
+              <Text style={[styles.modalidadBtnTexto, modalidad === 'VIRTUAL' && styles.modalidadBtnTextoActivo]}>Virtual</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.modalidadBtn, modalidad === 'PRESENCIAL' && styles.modalidadBtnActivo]}
               onPress={() => setModalidad('PRESENCIAL')}
             >
-              <Text style={[styles.modalidadBtnTexto, modalidad === 'PRESENCIAL' && styles.modalidadBtnTextoActivo]}>🏫 Presencial</Text>
+              <Text style={[styles.modalidadBtnTexto, modalidad === 'PRESENCIAL' && styles.modalidadBtnTextoActivo]}>Presencial</Text>
             </TouchableOpacity>
           </View>
         </View>

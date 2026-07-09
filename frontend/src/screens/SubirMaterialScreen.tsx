@@ -100,7 +100,7 @@ export default function SubirMaterialScreen({ route, navigation }: any) {
 
       <View style={styles.infoBox}>
         <Text style={styles.infoTexto}>
-          📎 Sube archivos PDF, PPT o documentos Word para que tus aprendices los descarguen antes y durante la sesión.
+          Sube archivos PDF, PPT o documentos Word para que tus aprendices los descarguen antes y durante la sesión.
         </Text>
       </View>
 
@@ -113,14 +113,14 @@ export default function SubirMaterialScreen({ route, navigation }: any) {
           contentContainerStyle={styles.lista}
           ListEmptyComponent={
             <View style={styles.vacio}>
-              <Text style={styles.vacioIcono}>📭</Text>
+              <Text style={styles.vacioIcono}></Text>
               <Text style={styles.vacioTexto}>Aún no hay materiales subidos para esta sesión.</Text>
             </View>
           }
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.cardLeft}>
-                <Text style={styles.cardIcono}>📄</Text>
+                <Text style={styles.cardIcono}></Text>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.cardNombre}>{item.nombre}</Text>
                   <Text style={styles.cardTipo}>{item.tipoArchivo} · {item.fechaSubida ? new Date(item.fechaSubida).toLocaleDateString('es-PE') : '-'}</Text>

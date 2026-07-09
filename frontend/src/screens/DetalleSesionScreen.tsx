@@ -59,7 +59,7 @@ export default function DetalleSesionScreen({ route, navigation }: any) {
       const msj = error.response?.data?.mensaje || 'Error al inscribirse.';
       if (msj.toLowerCase().includes('cruce') || msj.toLowerCase().includes('horario')) {
         Alert.alert(
-          '⚠️ Cruce de Horarios',
+          'Cruce de horarios',
           'No puedes inscribirte porque ya tienes otra sesión confirmada que se cruza con este horario.\n\nRevisa tus sesiones en "Mis Sesiones".',
           [{ text: 'Entendido', style: 'cancel' }]
         );
@@ -128,7 +128,7 @@ export default function DetalleSesionScreen({ route, navigation }: any) {
           <Text style={styles.titulo}>{sesion.titulo}</Text>
           {sesion.categoria ? (
             <View style={styles.categoriaBadge}>
-              <Text style={styles.categoriaTexto}>🏷️ {sesion.categoria}</Text>
+              <Text style={styles.categoriaTexto}>{sesion.categoria}</Text>
             </View>
           ) : null}
           <View style={styles.infoRow}>
@@ -151,7 +151,7 @@ export default function DetalleSesionScreen({ route, navigation }: any) {
           </View>
           {promedio && (
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>⭐ Calificación</Text>
+              <Text style={styles.infoLabel}>Calificación</Text>
               <Text style={styles.infoValor}>{promedio} / 5 ({calificaciones.length} reseñas)</Text>
             </View>
           )}
@@ -165,7 +165,7 @@ export default function DetalleSesionScreen({ route, navigation }: any) {
 
         {/* Materiales educativos - US27 */}
         <View style={styles.card}>
-          <Text style={styles.seccionTitulo}>📎 Materiales educativos</Text>
+          <Text style={styles.seccionTitulo}>Materiales educativos</Text>
           {materiales.length === 0 ? (
             <Text style={styles.vacioInline}>Esta sesion aun no tiene materiales subidos.</Text>
           ) : (
@@ -175,7 +175,7 @@ export default function DetalleSesionScreen({ route, navigation }: any) {
                 style={styles.materialRow}
                 onPress={() => handleDescargar(m.materialId, m.nombre)}
               >
-                <Text style={styles.materialNombre}>📄 {m.nombre}</Text>
+                <Text style={styles.materialNombre}>{m.nombre}</Text>
                 <Text style={styles.descargarTexto}>Descargar</Text>
               </TouchableOpacity>
             ))
@@ -205,7 +205,7 @@ export default function DetalleSesionScreen({ route, navigation }: any) {
         {/* Calificaciones - US19/US20 */}
         {sesion.estado === 'FINALIZADA' && (
           <View style={styles.card}>
-            <Text style={styles.seccionTitulo}>⭐ Calificar esta sesion</Text>
+            <Text style={styles.seccionTitulo}>Qué te pareció la sesión</Text>
             <View style={styles.estrellas}>
               {[1, 2, 3, 4, 5].map((n) => (
                 <TouchableOpacity key={n} onPress={() => setPuntuacion(n)}>
@@ -264,7 +264,7 @@ export default function DetalleSesionScreen({ route, navigation }: any) {
           style={[styles.boton, { backgroundColor: '#2D3748', marginTop: 4 }]}
           onPress={() => navigation.navigate('SubirMaterial', { sesionId: sesion.sesionId, sesionTitulo: sesion.titulo })}
         >
-          <Text style={styles.botonTexto}>📎 Gestionar materiales</Text>
+          <Text style={styles.botonTexto}>Gestionar materiales</Text>
         </TouchableOpacity>
 
       </ScrollView>
