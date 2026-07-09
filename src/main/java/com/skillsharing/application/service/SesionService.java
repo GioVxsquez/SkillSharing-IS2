@@ -69,6 +69,11 @@ public class SesionService {
             throw new IllegalArgumentException("modalidad invalida");
         }
 
+        // us09: guardar la categoria enviada por el instructor
+        if (dto.getCategoria() != null && !dto.getCategoria().isBlank()) {
+            nuevaSesion.setCategoria(dto.getCategoria().trim());
+        }
+
         return sesionRepository.save(nuevaSesion);
     }
 

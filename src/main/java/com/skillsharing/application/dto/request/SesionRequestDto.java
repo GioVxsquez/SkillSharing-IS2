@@ -38,4 +38,7 @@ public class SesionRequestDto {
     // solo para sesiones presenciales
     private String lugar;
 
+    // us09: categoria de la sesion para los filtros del home
+    private String categoria;
+
 }
