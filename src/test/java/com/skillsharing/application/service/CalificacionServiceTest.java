@@ -56,9 +56,10 @@ class CalificacionServiceTest {
         sesionFinalizada.setEstado(EstadoSesion.FINALIZADA);
     }
 
-    // US19: calificar una sesion finalizada con datos validos debe guardarse correctamente
-    @Test
-    void calificar_sesionFinalizada_debeGuardarCalificacion() {
+    // US19: calificar con puntuaciones VÁLIDAS (clases de equivalencia y valores límite)
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(ints = {1, 3, 5})
+    void calificar_puntuacionValida_debeGuardarCalificacion(int puntuacion) {
         when(sesionRepository.findById(1L)).thenReturn(Optional.of(sesionFinalizada));
         when(inscripcionRepository.existsBySesionSesionIdAndUsuarioUsuarioId(1L, 10L)).thenReturn(true);
         when(calificacionRepository.existsBySesionSesionIdAndUsuarioUsuarioId(1L, 10L)).thenReturn(false);
@@ -67,17 +68,16 @@ class CalificacionServiceTest {
         Calificacion guardada = Calificacion.builder()
                 .sesion(sesionFinalizada)
                 .usuario(aprendiz)
-                .puntuacion(4)
-                .comentario("Muy buena sesion")
+                .puntuacion(puntuacion)
+                .comentario("Comentario")
                 .build();
 
         when(calificacionRepository.save(any(Calificacion.class))).thenReturn(guardada);
 
-        Calificacion resultado = calificacionService.calificar(1L, 10L, 4, "Muy buena sesion");
+        Calificacion resultado = calificacionService.calificar(1L, 10L, puntuacion, "Comentario");
 
         assertNotNull(resultado);
-        assertEquals(4, resultado.getPuntuacion());
-        assertEquals("Muy buena sesion", resultado.getComentario());
+        assertEquals(puntuacion, resultado.getPuntuacion());
         verify(calificacionRepository, times(1)).save(any(Calificacion.class));
     }
 
@@ -105,15 +105,16 @@ class CalificacionServiceTest {
         );
     }
 
-    // US19: puntuacion fuera de rango debe lanzar excepcion
-    @Test
-    void calificar_puntuacionFueraDeRango_debeLanzarExcepcion() {
+    // US19: puntuaciones INVÁLIDAS (fuera de rango) deben lanzar excepcion
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(ints = {-1, 0, 6, 100})
+    void calificar_puntuacionFueraDeRango_debeLanzarExcepcion(int puntuacionInvalida) {
         when(sesionRepository.findById(1L)).thenReturn(Optional.of(sesionFinalizada));
         when(inscripcionRepository.existsBySesionSesionIdAndUsuarioUsuarioId(1L, 10L)).thenReturn(true);
         when(calificacionRepository.existsBySesionSesionIdAndUsuarioUsuarioId(1L, 10L)).thenReturn(false);
 
         assertThrows(IllegalArgumentException.class, () ->
-                calificacionService.calificar(1L, 10L, 6, "")
+                calificacionService.calificar(1L, 10L, puntuacionInvalida, "")
         );
     }
 

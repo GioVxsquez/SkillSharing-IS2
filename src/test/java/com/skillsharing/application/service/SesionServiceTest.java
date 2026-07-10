@@ -169,4 +169,49 @@ class SesionServiceTest {
         assertEquals(1, resultado.size());
         assertEquals(5L, resultado.get(0).getSesionId());
     }
+
+    // US01/US25: crear sesion con capacidad VÁLIDA (valores dentro de rango y límite)
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(ints = {1, 20, 100})
+    void crearSesion_capacidadValida_debeCrearSesion(int capacidad) {
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(instructor));
+        when(sesionRepository.existsByTituloIgnoreCase("Titulo")).thenReturn(false);
+        when(sesionRepository.countByInstructorUsuarioIdAndEstadoIn(eq(1L), any())).thenReturn(0L);
+
+        com.skillsharing.application.dto.request.SesionRequestDto dto = new com.skillsharing.application.dto.request.SesionRequestDto();
+        dto.setTitulo("Titulo");
+        dto.setDescripcion("Desc");
+        dto.setFechaSesion(LocalDateTime.now().plusDays(1));
+        dto.setModalidad("VIRTUAL");
+        dto.setMaxParticipantes(capacidad);
+        dto.setLinkSesion("link");
+
+        SesionAprendizaje creada = new SesionAprendizaje();
+        creada.setSesionId(10L);
+        when(sesionRepository.save(any())).thenReturn(creada);
+
+        SesionAprendizaje resultado = sesionService.crearSesion(1L, dto);
+
+        assertNotNull(resultado);
+        assertEquals(10L, resultado.getSesionId());
+        verify(sesionRepository).save(any());
+    }
+
+    // US01/US25: crear sesion con capacidad INVÁLIDA (fuera de los valores límite)
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(ints = {-5, 0, 101})
+    void crearSesion_capacidadInvalida_debeLanzarExcepcion(int capacidadInvalida) {
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(instructor));
+        when(sesionRepository.existsByTituloIgnoreCase("Titulo")).thenReturn(false);
+        when(sesionRepository.countByInstructorUsuarioIdAndEstadoIn(eq(1L), any())).thenReturn(0L);
+
+        com.skillsharing.application.dto.request.SesionRequestDto dto = new com.skillsharing.application.dto.request.SesionRequestDto();
+        dto.setTitulo("Titulo");
+        dto.setMaxParticipantes(capacidadInvalida);
+
+        assertThrows(IllegalArgumentException.class, () -> 
+            sesionService.crearSesion(1L, dto)
+        );
+        verify(sesionRepository, never()).save(any());
+    }
 }
