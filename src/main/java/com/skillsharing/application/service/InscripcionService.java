@@ -77,4 +77,21 @@ public class InscripcionService {
     public List<Inscripcion> listarInvitados(Long sesionId) {
         return inscripcionRepository.findBySesionSesionId(sesionId);
     }
+
+    // US18: Desinscribirse de una sesion publica
+    @Transactional
+    public void desinscribirse(Long sesionId, Long usuarioId) {
+        SesionAprendizaje sesion = sesionRepository.findById(sesionId)
+                .orElseThrow(() -> new RuntimeException("La sesion especifica no existe"));
+
+        if (sesion.getFechaSesion().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Operación rechazada: No puedes desinscribirte de una sesión que ya inició o finalizó.");
+        }
+
+        Inscripcion inscripcion = inscripcionRepository
+                .findBySesionSesionIdAndUsuarioUsuarioId(sesionId, usuarioId)
+                .orElseThrow(() -> new RuntimeException("El usuario no esta inscrito en esta sesion"));
+
+        inscripcionRepository.delete(inscripcion);
+    }
 }

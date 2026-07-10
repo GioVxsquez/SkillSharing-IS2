@@ -122,4 +122,14 @@ public class SesionController {
                 
         return ResponseEntity.ok(ApiResponse.exito("mis eventos gestionados", lista));
     }
+
+    // US08: Cancelar una sesion (Nueva)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<SesionResponseDto>> cancelar(@PathVariable Long id, Authentication auth) {
+        Long instructorId = usuarioRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("Instructor no encontrado en el sistema")).getUsuarioId();
+        SesionAprendizaje cancelada = sesionService.cancelarSesion(id, instructorId);
+        return ResponseEntity.ok(ApiResponse.exito("La sesión de aprendizaje fue cancelada de manera exitosa.", SesionResponseDto.fromEntity(cancelada)));
+    }
+
 }

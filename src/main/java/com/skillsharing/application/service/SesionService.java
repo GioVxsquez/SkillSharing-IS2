@@ -111,4 +111,22 @@ public class SesionService {
             throw new IllegalArgumentException("tipo de sesion invalido: usa PUBLICA o PRIVADA");
         }
     }
+
+    // US08: Cancelar una sesion (nueva)
+    @Transactional
+    public SesionAprendizaje cancelarSesion(Long sesionId, Long instructorId) {
+        SesionAprendizaje sesion = sesionRepository.findById(sesionId)
+                .orElseThrow(() -> new RuntimeException("sesion no encontrada"));
+
+        if (!sesion.getInstructor().getUsuarioId().equals(instructorId)) {
+            throw new SecurityException("solo el instructor dueno puede cancelar la sesion");
+        }
+
+        if (sesion.getEstado() == EstadoSesion.FINALIZADA || sesion.getEstado() == EstadoSesion.CANCELADA) {
+            throw new IllegalStateException("no se puede cancelar una sesion ya finalizada o cancelada");
+        }
+
+        sesion.setEstado(EstadoSesion.CANCELADA);
+        return sesionRepository.save(sesion);
+    }
 }
