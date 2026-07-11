@@ -40,8 +40,7 @@ public class SesionService {
 
         long sesionesAbiertas = sesionRepository.countByInstructorUsuarioIdAndEstadoIn(
                 instructorId,
-                List.of(EstadoSesion.ACTIVA)
-        );
+                List.of(EstadoSesion.ACTIVA));
         if (sesionesAbiertas >= 5) {
             throw new IllegalStateException("alcanzaste el limite de 5 sesiones activas creadas");
         }
@@ -58,13 +57,11 @@ public class SesionService {
         if ("VIRTUAL".equalsIgnoreCase(dto.getModalidad())) {
             nuevaSesion = SesionFactory.crearVirtual(
                     dto.getTitulo(), dto.getDescripcion(), dto.getFechaSesion(),
-                    maxParticipantes, dto.getLinkSesion(), instructor, tipo
-            );
+                    maxParticipantes, dto.getLinkSesion(), instructor, tipo);
         } else if ("PRESENCIAL".equalsIgnoreCase(dto.getModalidad())) {
             nuevaSesion = SesionFactory.crearPresencial(
                     dto.getTitulo(), dto.getDescripcion(), dto.getFechaSesion(),
-                    maxParticipantes, dto.getLugar(), instructor, tipo
-            );
+                    maxParticipantes, dto.getLugar(), instructor, tipo);
         } else {
             throw new IllegalArgumentException("modalidad invalida");
         }
@@ -77,8 +74,7 @@ public class SesionService {
         return sesionRepository.findByEstadoAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
                 EstadoSesion.ACTIVA,
                 TipoSesion.PUBLICA,
-                LocalDateTime.now()
-        );
+                LocalDateTime.now());
     }
 
     // hu04: ver detalle de sesion
@@ -91,8 +87,7 @@ public class SesionService {
     public List<SesionAprendizaje> listarPorInstructor(Long instructorId) {
         return sesionRepository.findByInstructorUsuarioIdAndFechaSesionAfterOrderByFechaSesionAsc(
                 instructorId,
-                LocalDateTime.now().minusDays(2)
-        );
+                LocalDateTime.now().minusDays(2));
     }
 
     private TipoSesion resolverTipo(SesionRequestDto dto) {
@@ -110,5 +105,17 @@ public class SesionService {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("tipo de sesion invalido: usa PUBLICA o PRIVADA");
         }
+    }
+
+    // US11: Filtrar sesiones por modalidad (VIRTUAL o PRESENCIAL)
+    public List<SesionAprendizaje> filtrarPorModalidad(String modalidad) {
+        com.skillsharing.domain.enums.ModalidadSesion mod;
+        try {
+            mod = com.skillsharing.domain.enums.ModalidadSesion.valueOf(modalidad.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("modalidad invalida. Usa VIRTUAL o PRESENCIAL");
+        }
+        return sesionRepository.findByModalidadAndEstadoAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
+                mod, EstadoSesion.ACTIVA, TipoSesion.PUBLICA, LocalDateTime.now());
     }
 }

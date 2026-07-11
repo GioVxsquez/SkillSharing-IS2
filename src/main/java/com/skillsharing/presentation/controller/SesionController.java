@@ -115,11 +115,20 @@ public class SesionController {
     public ResponseEntity<ApiResponse<List<SesionResponseDto>>> misEventos(Authentication auth) {
         Usuario instructor = usuarioRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("usuario no encontrado"));
-                
+
         List<SesionResponseDto> lista = sesionService.listarPorInstructor(instructor.getUsuarioId()).stream()
                 .map(SesionResponseDto::fromEntity)
                 .collect(Collectors.toList());
-                
+
         return ResponseEntity.ok(ApiResponse.exito("mis eventos gestionados", lista));
+    }
+
+    // US11: filtrar por modalidad
+    @GetMapping("/modalidad/{modalidad}")
+    public ResponseEntity<ApiResponse<List<SesionResponseDto>>> porModalidad(@PathVariable String modalidad) {
+        List<SesionResponseDto> lista = sesionService.filtrarPorModalidad(modalidad).stream()
+                .map(SesionResponseDto::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.exito("sesiones por modalidad", lista));
     }
 }

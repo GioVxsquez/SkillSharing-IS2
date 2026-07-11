@@ -13,21 +13,28 @@ import java.util.List;
 @Repository
 public interface SesionRepository extends JpaRepository<SesionAprendizaje, Long> {
 
-    List<SesionAprendizaje> findByEstado(EstadoSesion estado);
+        List<SesionAprendizaje> findByEstado(EstadoSesion estado);
 
-    List<SesionAprendizaje> findByInstructorUsuarioId(Long instructorId);
+        List<SesionAprendizaje> findByInstructorUsuarioId(Long instructorId);
 
-    boolean existsByTituloIgnoreCase(String titulo);
+        boolean existsByTituloIgnoreCase(String titulo);
 
-    long countByInstructorUsuarioIdAndEstadoIn(Long instructorId, List<EstadoSesion> estados);
+        long countByInstructorUsuarioIdAndEstadoIn(Long instructorId, List<EstadoSesion> estados);
 
-    List<SesionAprendizaje> findByEstadoAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
-            EstadoSesion estado,
-            TipoSesion tipo,
-            LocalDateTime fecha);
+        List<SesionAprendizaje> findByEstadoAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
+                        EstadoSesion estado,
+                        TipoSesion tipo,
+                        LocalDateTime fecha);
 
-    List<SesionAprendizaje> findByInstructorUsuarioIdAndFechaSesionAfterOrderByFechaSesionAsc(
-            Long instructorId,
-            LocalDateTime fecha);
+        List<SesionAprendizaje> findByInstructorUsuarioIdAndFechaSesionAfterOrderByFechaSesionAsc(
+                        Long instructorId,
+                        LocalDateTime fecha);
+
+        // US11: Filtrar por modalidad
+        List<SesionAprendizaje> findByModalidadAndEstadoAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
+                        com.skillsharing.domain.enums.ModalidadSesion modalidad,
+                        EstadoSesion estado,
+                        TipoSesion tipo,
+                        LocalDateTime fecha);
 
 }
