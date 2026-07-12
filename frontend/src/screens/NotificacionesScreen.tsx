@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { api } from '../api/config';
 
-// US12, US13: Pantalla de notificaciones
+// US12, US13
 export default function NotificacionesScreen({ navigation }: any) {
   const [notificaciones, setNotificaciones] = useState<any[]>([]);
   const [loading, setLoading]               = useState(true);
@@ -33,20 +33,19 @@ export default function NotificacionesScreen({ navigation }: any) {
       setNotificaciones((prev) =>
         prev.map((n) => (n.notificacionId === id ? { ...n, visto: true } : n))
       );
-    } catch {
-      // Ignorar si falla
-    }
+    } catch {}
   };
 
   const marcarTodasComoVistas = async () => {
     try {
       await api.put('/notificaciones/marcar-todas');
       setNotificaciones((prev) => prev.map((n) => ({ ...n, visto: true })));
-      Alert.alert('Éxito', 'Todas las notificaciones fueron marcadas como leídas.');
     } catch {
       Alert.alert('Error', 'No se pudieron marcar todas como leídas.');
     }
   };
+
+  const noLeidas = notificaciones.filter((n) => !n.visto).length;
 
   const renderNotificacion = ({ item }: any) => (
     <TouchableOpacity
@@ -54,39 +53,47 @@ export default function NotificacionesScreen({ navigation }: any) {
       onPress={() => marcarComoVista(item.notificacionId)}
       activeOpacity={0.8}
     >
-      <View style={styles.cardHeader}>
+      <View style={styles.cardLeft}>
+        <View style={[styles.indicador, item.visto && styles.indicadorVisto]} />
+      </View>
+      <View style={styles.cardBody}>
         <Text style={[styles.cardMensaje, !item.visto && styles.mensajeNoLeido]}>
           {item.mensaje}
         </Text>
-        {!item.visto && <View style={styles.dot} />}
+        <Text style={styles.cardFecha}>
+          {item.fechaCreacion ? new Date(item.fechaCreacion).toLocaleString('es-PE') : 'Hace un momento'}
+        </Text>
       </View>
-      <Text style={styles.cardFecha}>
-        {item.fechaCreacion ? new Date(item.fechaCreacion).toLocaleString('es-PE') : 'Hace un momento'}
-      </Text>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1B3A6B" />
+      <StatusBar barStyle="light-content" backgroundColor="#0F1C36" />
 
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backTexto}>← Volver</Text>
+          <Text style={styles.backTexto}>Volver</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitulo}>Notificaciones</Text>
-        {notificaciones.some((n) => !n.visto) ? (
+        <View style={styles.headerCenter}>
+          <Text style={styles.headerTitulo}>Notificaciones</Text>
+          {noLeidas > 0 && (
+            <View style={styles.cuentaBadge}>
+              <Text style={styles.cuentaBadgeTexto}>{noLeidas}</Text>
+            </View>
+          )}
+        </View>
+        {noLeidas > 0 ? (
           <TouchableOpacity onPress={marcarTodasComoVistas}>
-            <Text style={styles.marcarLeidoBtn}>Marcar todo leído</Text>
+            <Text style={styles.marcarBtn}>Leer todo</Text>
           </TouchableOpacity>
         ) : (
-          <View style={{ width: 80 }} />
+          <View style={{ width: 60 }} />
         )}
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#1B3A6B" style={{ marginTop: 40 }} />
+        <ActivityIndicator size="large" color="#F97316" style={{ marginTop: 40 }} />
       ) : (
         <FlatList
           data={notificaciones}
@@ -96,15 +103,12 @@ export default function NotificacionesScreen({ navigation }: any) {
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
-              onRefresh={() => {
-                setRefreshing(true);
-                cargarNotificaciones();
-              }}
-              colors={['#1B3A6B']}
+              onRefresh={() => { setRefreshing(true); cargarNotificaciones(); }}
+              colors={['#F97316']}
             />
           }
           ListEmptyComponent={
-            <Text style={styles.vacio}>No tienes notificaciones pendientes.</Text>
+            <Text style={styles.vacio}>Sin notificaciones por ahora.</Text>
           }
         />
       )}
@@ -113,41 +117,39 @@ export default function NotificacionesScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F9FC' },
+  container: { flex: 1, backgroundColor: '#F0F4F8' },
   header: {
-    backgroundColor: '#1B3A6B',
-    paddingTop: 48,
-    paddingBottom: 16,
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
+    backgroundColor: '#0F1C36',
+    paddingTop: 52, paddingBottom: 20, paddingHorizontal: 20,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
   },
-  backTexto: { color: '#C8D8F0', fontSize: 14, fontWeight: '600' },
-  headerTitulo: { color: '#FFFFFF', fontSize: 18, fontWeight: '700' },
-  marcarLeidoBtn: { color: '#FFD700', fontSize: 12, fontWeight: '600' },
+  backTexto: { color: '#8898AA', fontSize: 14, fontWeight: '600' },
+  headerCenter: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  headerTitulo: { color: '#FFFFFF', fontSize: 18, fontWeight: '800' },
+  cuentaBadge: {
+    backgroundColor: '#F97316', borderRadius: 12,
+    paddingHorizontal: 8, paddingVertical: 2,
+  },
+  cuentaBadgeTexto: { color: '#FFFFFF', fontSize: 11, fontWeight: '800' },
+  marcarBtn: { color: '#F97316', fontSize: 13, fontWeight: '700' },
   lista: { padding: 16 },
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#1B3A6B',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
+    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 16, marginBottom: 10,
+    flexDirection: 'row', alignItems: 'flex-start', gap: 12,
+    shadowColor: '#0F1C36', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2,
   },
   cardNoLeida: {
-    backgroundColor: '#E6F4FF',
-    borderColor: '#91CAFF',
+    backgroundColor: '#FFF8F4',
+    borderLeftWidth: 0,
+    borderWidth: 1,
+    borderColor: '#FDCBA4',
   },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  cardMensaje: { fontSize: 14, color: '#4A5568', flex: 1, lineHeight: 20 },
-  mensajeNoLeido: { fontWeight: '700', color: '#1A202C' },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#1B3A6B', marginLeft: 8, marginTop: 6 },
-  cardFecha: { fontSize: 11, color: '#718096', marginTop: 8 },
-  vacio: { textAlign: 'center', color: '#718096', marginTop: 60, fontSize: 15 },
+  cardLeft: { paddingTop: 4 },
+  indicador: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#F97316' },
+  indicadorVisto: { backgroundColor: '#E2E8F0' },
+  cardBody: { flex: 1 },
+  cardMensaje: { fontSize: 14, color: '#4A5568', lineHeight: 20, marginBottom: 6 },
+  mensajeNoLeido: { fontWeight: '700', color: '#0F1C36' },
+  cardFecha: { fontSize: 11, color: '#8898AA', fontWeight: '600' },
+  vacio: { textAlign: 'center', color: '#8898AA', marginTop: 60, fontSize: 15 },
 });

@@ -5,8 +5,7 @@ import {
 } from 'react-native';
 import { api } from '../api/config';
 
-// HU28: Visualizar invitaciones privadas recibidas
-// HU07: Confirmar/Rechazar asistencia a sesión privada
+// HU28, HU07
 export default function InvitacionesScreen({ navigation }: any) {
   const [invitaciones, setInvitaciones] = useState<any[]>([]);
   const [loading, setLoading]           = useState(true);
@@ -27,13 +26,12 @@ export default function InvitacionesScreen({ navigation }: any) {
 
   useEffect(() => { cargar(); }, [cargar]);
 
-  // HU07: aceptar o rechazar invitación privada
   const responder = async (invitacionId: number, aceptar: boolean) => {
     setProcesando(invitacionId);
     try {
       const resp = await api.put(`/invitaciones/${invitacionId}/responder?aceptar=${aceptar}`);
       if (resp.data.ok) {
-        Alert.alert('¡Listo!', aceptar ? 'Invitación aceptada.' : 'Invitación rechazada.');
+        Alert.alert('Listo', aceptar ? 'Invitación aceptada.' : 'Invitación rechazada.');
         cargar();
       }
     } catch (error: any) {
@@ -43,35 +41,43 @@ export default function InvitacionesScreen({ navigation }: any) {
     }
   };
 
+  const estadoColor: Record<string, string> = {
+    PENDIENTE: '#F59E0B',
+    ACEPTADA: '#22C55E',
+    RECHAZADA: '#EF4444',
+  };
+
   const renderItem = ({ item }: any) => {
     const estaRespondida = item.estado !== 'PENDIENTE';
     return (
       <View style={styles.card}>
-        <Text style={styles.cardTitulo}>{item.sesionTitulo || 'Sesión privada'}</Text>
-        <Text style={styles.cardInfo}>👤 De: {item.emisorNombre || 'Instructor'}</Text>
-        <Text style={styles.cardInfo}>📅 {item.fechaSesion ? new Date(item.fechaSesion).toLocaleDateString('es-PE') : '—'}</Text>
-
-        <View style={[styles.estadoBadge, estaRespondida ? styles.estadoRespondida : styles.estadoPendiente]}>
-          <Text style={styles.estadoTexto}>{item.estado}</Text>
+        <View style={styles.cardTop}>
+          <Text style={styles.cardTitulo} numberOfLines={2}>{item.sesionTitulo || 'Sesión privada'}</Text>
+          <View style={[styles.estadoPill, { backgroundColor: (estadoColor[item.estado] || '#8898AA') + '22' }]}>
+            <View style={[styles.estadoPunto, { backgroundColor: estadoColor[item.estado] || '#8898AA' }]} />
+            <Text style={[styles.estadoTexto, { color: estadoColor[item.estado] || '#8898AA' }]}>{item.estado}</Text>
+          </View>
         </View>
-
+        <Text style={styles.cardMeta}>
+          {item.emisorNombre || 'Instructor'} · {item.fechaSesion ? new Date(item.fechaSesion).toLocaleDateString('es-PE', { day: '2-digit', month: 'short' }) : '—'}
+        </Text>
         {!estaRespondida && (
           <View style={styles.botones}>
             <TouchableOpacity
-              style={[styles.botonAceptar, procesando === item.invitacionId && { opacity: 0.5 }]}
+              style={[styles.botonAceptar, procesando === item.invitacionId && { opacity: 0.6 }]}
               onPress={() => responder(item.invitacionId, true)}
               disabled={procesando === item.invitacionId}
             >
               {procesando === item.invitacionId
                 ? <ActivityIndicator size="small" color="#fff" />
-                : <Text style={styles.botonTexto}>✅ Aceptar</Text>}
+                : <Text style={styles.botonAceptarTexto}>Aceptar</Text>}
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.botonRechazar, procesando === item.invitacionId && { opacity: 0.5 }]}
+              style={[styles.botonRechazar, procesando === item.invitacionId && { opacity: 0.6 }]}
               onPress={() => responder(item.invitacionId, false)}
               disabled={procesando === item.invitacionId}
             >
-              <Text style={styles.botonTextoRechazo}>❌ Rechazar</Text>
+              <Text style={styles.botonRechazarTexto}>Rechazar</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -81,24 +87,25 @@ export default function InvitacionesScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1B3A6B" />
+      <StatusBar barStyle="light-content" backgroundColor="#0F1C36" />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backTexto}>← Volver</Text>
+          <Text style={styles.backTexto}>Volver</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitulo}>Mis Invitaciones</Text>
+        <Text style={styles.headerTitulo}>Invitaciones</Text>
+        <View style={{ width: 40 }} />
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#1B3A6B" style={{ marginTop: 40 }} />
+        <ActivityIndicator size="large" color="#F97316" style={{ marginTop: 40 }} />
       ) : (
         <FlatList
           data={invitaciones}
           keyExtractor={(item) => String(item.invitacionId)}
           renderItem={renderItem}
           contentContainerStyle={styles.lista}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); cargar(); }} colors={['#1B3A6B']} />}
-          ListEmptyComponent={<Text style={styles.vacio}>No tienes invitaciones pendientes.</Text>}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); cargar(); }} colors={['#F97316']} />}
+          ListEmptyComponent={<Text style={styles.vacio}>Sin invitaciones por ahora.</Text>}
         />
       )}
     </View>
@@ -106,22 +113,40 @@ export default function InvitacionesScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F9FC' },
-  header: { backgroundColor: '#1B3A6B', paddingTop: 48, paddingBottom: 16, paddingHorizontal: 20 },
-  backTexto: { color: '#C8D8F0', fontSize: 14, marginBottom: 6 },
-  headerTitulo: { color: '#FFFFFF', fontSize: 20, fontWeight: '700' },
+  container: { flex: 1, backgroundColor: '#F0F4F8' },
+  header: {
+    backgroundColor: '#0F1C36',
+    paddingTop: 52, paddingBottom: 20, paddingHorizontal: 20,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+  },
+  backTexto: { color: '#8898AA', fontSize: 14, fontWeight: '600' },
+  headerTitulo: { color: '#FFFFFF', fontSize: 18, fontWeight: '800' },
   lista: { padding: 16, paddingBottom: 40 },
-  card: { backgroundColor: '#FFFFFF', borderRadius: 14, padding: 16, marginBottom: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
-  cardTitulo: { fontSize: 16, fontWeight: '700', color: '#1A202C', marginBottom: 8 },
-  cardInfo: { fontSize: 13, color: '#4A5568', marginBottom: 4 },
-  estadoBadge: { alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20, marginTop: 10 },
-  estadoPendiente: { backgroundColor: '#FFF3E0' },
-  estadoRespondida: { backgroundColor: '#E8F5E9' },
-  estadoTexto: { fontSize: 12, fontWeight: '700', color: '#1B3A6B' },
-  botones: { flexDirection: 'row', gap: 10, marginTop: 14 },
-  botonAceptar: { flex: 1, backgroundColor: '#1B3A6B', paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
-  botonRechazar: { flex: 1, borderWidth: 2, borderColor: '#E53E3E', paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
-  botonTexto: { color: '#FFFFFF', fontWeight: '700', fontSize: 14 },
-  botonTextoRechazo: { color: '#E53E3E', fontWeight: '700', fontSize: 14 },
-  vacio: { textAlign: 'center', color: '#718096', marginTop: 60, fontSize: 15 },
+  card: {
+    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 18, marginBottom: 12,
+    shadowColor: '#0F1C36', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 8, elevation: 3,
+  },
+  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, gap: 10 },
+  cardTitulo: { fontSize: 15, fontWeight: '800', color: '#0F1C36', flex: 1, lineHeight: 21 },
+  estadoPill: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, flexShrink: 0,
+  },
+  estadoPunto: { width: 6, height: 6, borderRadius: 3 },
+  estadoTexto: { fontSize: 11, fontWeight: '800' },
+  cardMeta: { fontSize: 13, color: '#8898AA', fontWeight: '600', marginBottom: 14 },
+  botones: { flexDirection: 'row', gap: 10 },
+  botonAceptar: {
+    flex: 1, backgroundColor: '#F97316', paddingVertical: 12,
+    borderRadius: 12, alignItems: 'center',
+    shadowColor: '#F97316', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4,
+  },
+  botonAceptarTexto: { color: '#FFFFFF', fontWeight: '800', fontSize: 14 },
+  botonRechazar: {
+    flex: 1, borderWidth: 1.5, borderColor: '#EF4444',
+    paddingVertical: 12, borderRadius: 12, alignItems: 'center',
+    backgroundColor: '#FFF5F5',
+  },
+  botonRechazarTexto: { color: '#EF4444', fontWeight: '800', fontSize: 14 },
+  vacio: { textAlign: 'center', color: '#8898AA', marginTop: 60, fontSize: 15 },
 });

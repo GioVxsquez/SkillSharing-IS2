@@ -6,8 +6,7 @@ import {
 import * as DocumentPicker from 'expo-document-picker';
 import { api } from '../api/config';
 
-// US05: Subir material educativo a una sesion
-// US27: Listar materiales subidos (vista previa del instructor)
+// US05, US27
 export default function SubirMaterialScreen({ route, navigation }: any) {
   const { sesionId, sesionTitulo } = route.params;
   const [materiales, setMateriales] = useState<any[]>([]);
@@ -29,7 +28,6 @@ export default function SubirMaterialScreen({ route, navigation }: any) {
     cargarMateriales();
   }, [sesionId]);
 
-  // US05: cargar archivo desde el dispositivo
   const handleSubirDocumento = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -54,7 +52,7 @@ export default function SubirMaterialScreen({ route, navigation }: any) {
       });
 
       if (resp.data.ok) {
-        Alert.alert('Éxito', 'Material subido correctamente.');
+        Alert.alert('Listo', 'Material subido correctamente.');
         cargarMateriales();
       }
     } catch (error: any) {
@@ -67,7 +65,7 @@ export default function SubirMaterialScreen({ route, navigation }: any) {
   const handleEliminar = (materialId: number, nombre: string) => {
     Alert.alert(
       'Eliminar material',
-      `¿Eliminar el archivo "${nombre}"?`,
+      `¿Eliminar "${nombre}"?`,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -88,24 +86,26 @@ export default function SubirMaterialScreen({ route, navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1B3A6B" />
+      <StatusBar barStyle="light-content" backgroundColor="#0F1C36" />
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backTexto}>← Volver</Text>
+          <Text style={styles.backTexto}>Volver</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitulo}>Materiales</Text>
-        <Text style={styles.headerSubtitulo} numberOfLines={1}>{sesionTitulo}</Text>
+        <View style={styles.headerTextos}>
+          <Text style={styles.headerTitulo}>Materiales</Text>
+          <Text style={styles.headerSub} numberOfLines={1}>{sesionTitulo}</Text>
+        </View>
       </View>
 
       <View style={styles.infoBox}>
         <Text style={styles.infoTexto}>
-          Sube archivos PDF, PPT o documentos Word para que tus aprendices los descarguen antes y durante la sesión.
+          Sube archivos PDF, PPT o Word para que tus aprendices los descarguen.
         </Text>
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#1B3A6B" style={{ marginTop: 40 }} />
+        <ActivityIndicator size="large" color="#F97316" style={{ marginTop: 40 }} />
       ) : (
         <FlatList
           data={materiales}
@@ -113,21 +113,22 @@ export default function SubirMaterialScreen({ route, navigation }: any) {
           contentContainerStyle={styles.lista}
           ListEmptyComponent={
             <View style={styles.vacio}>
-              <Text style={styles.vacioIcono}></Text>
-              <Text style={styles.vacioTexto}>Aún no hay materiales subidos para esta sesión.</Text>
+              <Text style={styles.vacioTexto}>Aún no hay archivos subidos para esta sesión.</Text>
             </View>
           }
           renderItem={({ item }) => (
             <View style={styles.card}>
-              <View style={styles.cardLeft}>
-                <Text style={styles.cardIcono}></Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.cardNombre}>{item.nombre}</Text>
-                  <Text style={styles.cardTipo}>{item.tipoArchivo} · {item.fechaSubida ? new Date(item.fechaSubida).toLocaleDateString('es-PE') : '-'}</Text>
-                </View>
+              <View style={styles.cardIcono}>
+                <Text style={styles.cardIconoTexto}>{item.tipoArchivo?.slice(0, 3) || 'DOC'}</Text>
               </View>
-              <TouchableOpacity onPress={() => handleEliminar(item.materialId, item.nombre)}>
-                <Text style={styles.eliminarTexto}>✕</Text>
+              <View style={styles.cardDatos}>
+                <Text style={styles.cardNombre} numberOfLines={1}>{item.nombre}</Text>
+                <Text style={styles.cardMeta}>
+                  {item.tipoArchivo} · {item.fechaSubida ? new Date(item.fechaSubida).toLocaleDateString('es-PE') : '-'}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => handleEliminar(item.materialId, item.nombre)} style={styles.eliminarBtn}>
+                <Text style={styles.eliminarTexto}>X</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -149,23 +150,43 @@ export default function SubirMaterialScreen({ route, navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F9FC' },
-  header: { backgroundColor: '#1B3A6B', paddingTop: 48, paddingBottom: 16, paddingHorizontal: 20 },
-  backTexto: { color: '#C8D8F0', fontSize: 14, marginBottom: 4, fontWeight: '600' },
-  headerTitulo: { color: '#FFFFFF', fontSize: 18, fontWeight: '700' },
-  headerSubtitulo: { color: '#C8D8F0', fontSize: 13, marginTop: 2 },
-  infoBox: { backgroundColor: '#EBF4FF', margin: 16, padding: 14, borderRadius: 10, borderLeftWidth: 3, borderLeftColor: '#1B3A6B' },
-  infoTexto: { fontSize: 13, color: '#2C5282', lineHeight: 20 },
-  lista: { padding: 16, paddingBottom: 40 },
-  vacio: { alignItems: 'center', marginTop: 48 },
-  vacioIcono: { fontSize: 48, marginBottom: 12 },
-  vacioTexto: { fontSize: 15, color: '#718096', textAlign: 'center' },
-  card: { backgroundColor: '#FFFFFF', borderRadius: 12, padding: 14, marginBottom: 10, flexDirection: 'row', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
-  cardLeft: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
-  cardIcono: { fontSize: 24 },
-  cardNombre: { fontSize: 14, fontWeight: '700', color: '#1A202C' },
-  cardTipo: { fontSize: 12, color: '#718096', marginTop: 2 },
-  eliminarTexto: { color: '#E53E3E', fontSize: 18, fontWeight: '700', paddingHorizontal: 8 },
-  botonSubir: { marginTop: 16, backgroundColor: '#1B3A6B', paddingVertical: 16, borderRadius: 12, alignItems: 'center' },
-  botonSubirTexto: { color: '#FFFFFF', fontWeight: '700', fontSize: 16 },
+  container: { flex: 1, backgroundColor: '#F0F4F8' },
+  header: {
+    backgroundColor: '#0F1C36',
+    paddingTop: 52, paddingBottom: 20, paddingHorizontal: 20,
+    flexDirection: 'row', alignItems: 'flex-end', gap: 16,
+  },
+  backTexto: { color: '#8898AA', fontSize: 14, fontWeight: '600', marginBottom: 2 },
+  headerTextos: { flex: 1 },
+  headerTitulo: { color: '#FFFFFF', fontSize: 18, fontWeight: '800' },
+  headerSub: { color: '#8898AA', fontSize: 12, marginTop: 2 },
+  infoBox: {
+    backgroundColor: '#FFF8F4', margin: 16, padding: 14,
+    borderRadius: 12, borderLeftWidth: 3, borderLeftColor: '#F97316',
+  },
+  infoTexto: { fontSize: 13, color: '#92400E', lineHeight: 20 },
+  lista: { paddingHorizontal: 16, paddingBottom: 40 },
+  vacio: { alignItems: 'center', marginTop: 40 },
+  vacioTexto: { fontSize: 14, color: '#8898AA', textAlign: 'center' },
+  card: {
+    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 10,
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    shadowColor: '#0F1C36', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2,
+  },
+  cardIcono: {
+    width: 44, height: 44, borderRadius: 12,
+    backgroundColor: '#FFF0E6', justifyContent: 'center', alignItems: 'center', flexShrink: 0,
+  },
+  cardIconoTexto: { fontSize: 11, fontWeight: '900', color: '#F97316' },
+  cardDatos: { flex: 1 },
+  cardNombre: { fontSize: 14, fontWeight: '700', color: '#0F1C36' },
+  cardMeta: { fontSize: 12, color: '#8898AA', marginTop: 2 },
+  eliminarBtn: { padding: 8 },
+  eliminarTexto: { color: '#EF4444', fontSize: 14, fontWeight: '800' },
+  botonSubir: {
+    marginTop: 16, backgroundColor: '#F97316', paddingVertical: 15,
+    borderRadius: 14, alignItems: 'center',
+    shadowColor: '#F97316', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5,
+  },
+  botonSubirTexto: { color: '#FFFFFF', fontWeight: '800', fontSize: 15 },
 });
