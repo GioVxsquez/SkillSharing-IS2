@@ -194,3 +194,74 @@ CASOS DE PRUEBA NO VÁLIDOS
 
 */
 
+
+
+
+/*
+=========================================================
+HISTORIA DE USUARIO HU15 - INICIO DE SESIÓN
+PRUEBA DE CAJA BLANCA
+TÉCNICA: PRUEBA DEL CAMINO BÁSICO
+=========================================================
+
+GRAFO DE FLUJO
+
+                 (1)
+                   |
+                   v
+         Intentar autenticación
+                   |
+                   v
+     ¿Autenticación correcta?
+          /              \
+        Sí                No
+        |                 |
+       (2)        ¿Cuenta inactiva?
+ Generar JWT          /          \
+ Respuesta 200      Sí           No
+        |            |            |
+        |           (3)          (4)
+        |      Respuesta 403  Respuesta 401
+        |            |            |
+         \           |           /
+          \          |          /
+           \         |         /
+            \        |        /
+                 (5)
+                 FIN
+
+
+COMPLEJIDAD CICLOMÁTICA
+
+Número de decisiones:
+1. ¿Autenticación correcta?
+2. ¿Cuenta inactiva?
+
+V(G) = Número de decisiones + 1
+
+V(G) = 2 + 1 = 3
+
+Se requieren 3 caminos independientes.
+
+
+CAMINOS INDEPENDIENTES
+
+Camino 1:
+1 -> 2 -> 5
+
+Camino 2:
+1 -> 3 -> 5
+
+Camino 3:
+1 -> 4 -> 5
+
+
+CASOS DE PRUEBA
+
+| Camino | Datos de prueba |
+|---------|-----------------|
+| Camino 1 | Correo registrado, contraseña correcta y cuenta activa. |
+| Camino 2 | Correo registrado, contraseña correcta y cuenta inactiva. |
+| Camino 3 | Correo no registrado o contraseña incorrecta. |
+
+*/
