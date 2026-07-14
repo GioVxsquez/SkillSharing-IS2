@@ -23,6 +23,7 @@ public class InvitacionService {
     private final SesionRepository sesionRepository;
     private final UsuarioRepository usuarioRepository;
     private final InscripcionService inscripcionService;
+    private final NotificacionService notificacionService;
 
     // hu06: invitar asistentes
     @Transactional
@@ -68,7 +69,11 @@ public class InvitacionService {
                 .fechaEnvio(LocalDateTime.now())
                 .build();
                 
-        return invitacionRepository.save(inv);
+        Invitacion invitacion = invitacionRepository.save(inv);
+
+        notificacionService.notificarNuevaInvitacion(invitado, sesion);
+
+        return invitacion;
     }
 
     // hu28: visualizar invitaciones privadas
@@ -106,5 +111,7 @@ public class InvitacionService {
         }
         
         invitacionRepository.save(inv);
+
+        notificacionService.notificarRespuestaInvitacion(inv);
     }
 }
