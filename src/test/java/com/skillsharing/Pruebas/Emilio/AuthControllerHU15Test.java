@@ -156,3 +156,41 @@ class AuthControllerHU15Test {
         verify(jwtUtil).generateToken(any(UserDetails.class));
     }
 }
+
+
+/*
+=========================================================
+HISTORIA DE USUARIO HU15 - INICIO DE SESIÓN
+PRUEBA DE CAJA NEGRA
+TÉCNICA: PARTICIÓN DE EQUIVALENCIA
+=========================================================
+
+TABLA DE CLASES DE EQUIVALENCIA
+
+| Datos de entrada | Clases válidas                      | Clases no válidas                           |
+|------------------|-------------------------------------|---------------------------------------------|
+| Correo           | (1) Usuario registrado              | (2) Usuario no registrado                   |
+|                  |                                     | (3) Formato de correo inválido              |
+|                  |                                     | (4) Campo vacío                             |
+| Contraseña       | (5) Contraseña correcta             | (6) Contraseña incorrecta                   |
+|                  |                                     | (7) Campo vacío                             |
+| Estado de cuenta | (8) Cuenta activa                   | (9) Cuenta inactiva                         |
+
+CASOS DE PRUEBA VÁLIDOS
+
+| Correo            | Contraseña | Estado de cuenta | Clases cubiertas |
+|--------------------|------------|------------------|------------------|
+| usuario1@test.com  | 123456     | Activa           | (1) (5) (8)      |
+
+CASOS DE PRUEBA NO VÁLIDOS
+
+| Correo               | Contraseña | Estado de cuenta | Clases cubiertas |
+|-----------------------|------------|------------------|------------------|
+| usuario1@test.com     | clave123   | Activa           | (1) (6) (8)      |
+| inexistente@test.com  | 123456     | ---              | (2) (5)          |
+| correoinvalido        | 123456     | ---              | (3) (5)          |
+|                       |            | ---              | (4) (7)          |
+| usuario2@test.com     | 123456     | Inactiva         | (1) (5) (9)      |
+
+*/
+
