@@ -89,25 +89,25 @@ TÉCNICA: PARTICIÓN DE EQUIVALENCIA
 
 TABLA DE CLASES DE EQUIVALENCIA
 
-| Dato/Condición          | Clases válidas                              | Clases no válidas                                  |
-|--------------------------|-----------------------------------------------|-------------------------------------------------------|
-| Sesión                   | (1) Existe y organizador es su instructor     | (7) Sesión no existe  (8) Organizador no es el instructor |
-| Tipo de sesión           | (2) PRIVADA                                    | (9) No es PRIVADA (PUBLICA)                            |
-| Fecha de sesión          | (3) Futura (no ha iniciado)                    | (10) Ya inició                                          |
-| Invitado                 | (4) Existe y es distinto al organizador        | (11) No existe  (12) Es el mismo organizador            |
-| Invitación previa        | (5) No ha sido invitado antes                  | (13) Ya fue invitado (RN11)                             |
-| Cupo de invitaciones     | (6) Invitaciones activas < 50                  | (14) Invitaciones activas = 50 (RN12)                   |
+| Dato/Condición           | Clases válidas                              | Clases no válidas                                         |
+|--------------------------|---------------------------------------------|-----------------------------------------------------------|
+| Sesión                   | (1) Existe y organizador es su instructor   | (7) Sesión no existe  (8) Organizador no es el instructor |
+| Tipo de sesión           | (2) PRIVADA                                 | (9) No es PRIVADA (PUBLICA)                               |
+| Fecha de sesión          | (3) Futura (no ha iniciado)                 | (10) Ya inició                                            |
+| Invitado                 | (4) Existe y es distinto al organizador     | (11) No existe  (12) Es el mismo organizador              |
+| Invitación previa        | (5) No ha sido invitado antes               | (13) Ya fue invitado (RN11)                               |
+| Cupo de invitaciones     | (6) Invitaciones activas =< 50              | (14) Invitaciones activas < 50 (RN12)                     |
 
 CASOS DE PRUEBA VÁLIDOS
 
-| Código | Tipo de sesión | Fecha de sesión | Organizador       | Invitado                    | Clases Cubiertas              |
-|--------|-----------------|-------------------|----------------------|---------------------------------|-----------------------------------|
-| 300    | PRIVADA         | Futura            | Es el instructor      | Existe, distinto, sin invitación previa | (1)ᶜ (2)ᶜ (3)ᶜ (4)ᶜ (5)ᶜ (6)ᶜ     |
+| Código | Tipo de sesión | Fecha de sesión  | Organizador      | Invitado                                | Clases Cubiertas              |
+|--------|-----------------|-----------------|------------------|-----------------------------------------|-------------------------------|
+| 300    | PRIVADA         | Futura          | Es el instructor | Existe, distinto, sin invitación previa | (1)ᶜ (2)ᶜ (3)ᶜ (4)ᶜ (5)ᶜ (6)ᶜ |
 
 CASOS DE PRUEBA NO VÁLIDOS
 
-| Código | Tipo de sesión | Fecha de sesión | Organizador           | Invitado                        | Clases Cubiertas |
-|--------|-----------------|-------------------|--------------------------|-------------------------------------|----------------------|
+| Código | Tipo de sesión  | Fecha de sesión    | Organizador              | Invitado                              |   Clases Cubiertas  |
+|--------|-----------------|-------------------|---------------------------|---------------------------------------|---------------------|
 | 400    | ---             | ---               | Cualquiera                | Cualquiera                            | (7)ᶜ                |
 | 500    | PRIVADA         | Futura            | No es el instructor       | Válido                                | (1) (2) (3) (8)ᶜ    |
 | 600    | PUBLICA         | Futura            | Es el instructor          | Válido                                | (1) (3) (9)ᶜ        |
@@ -115,7 +115,7 @@ CASOS DE PRUEBA NO VÁLIDOS
 | 800    | PRIVADA         | Futura            | Es el instructor          | No existe                             | (1) (2) (3) (11)ᶜ   |
 | 900    | PRIVADA         | Futura            | Es el instructor          | Mismo usuario que el organizador      | (1) (2) (3) (12)ᶜ   |
 | 1000   | PRIVADA         | Futura            | Es el instructor          | Ya fue invitado antes                 | (1) (2) (3) (4) (13)ᶜ |
-| 1100   | PRIVADA         | Futura            | Es el instructor          | Válido, con 50 invitaciones activas   | (1) (2) (3) (4) (5) (14)ᶜ |
+| 1100   | PRIVADA         | Futura            | Es el instructor          | Válido, con 51 invitaciones activas   | (1) (2) (3) (4) (5) (14)ᶜ |
 */
 
 
