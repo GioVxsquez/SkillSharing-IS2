@@ -77,10 +77,9 @@ public class SesionService {
         return sesionRepository.save(nuevaSesion);
     }
 
-    // hu16: listar sesiones publicas activas
+    // hu16: listar sesiones publicas activas y pendientes (proximas)
     public List<SesionAprendizaje> listarActivas() {
-        return sesionRepository.findByEstadoAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
-                EstadoSesion.ACTIVA,
+        return sesionRepository.findByTipoAndFechaSesionAfterOrderByFechaSesionAsc(
                 TipoSesion.PUBLICA,
                 LocalDateTime.now()
         );
@@ -141,10 +140,10 @@ public class SesionService {
         return sesionRepository.save(sesion);
     }
 
-    // us09: filtrar sesiones por categoria
+    // us09: filtrar sesiones por categoria (incluye activas y pendientes)
     public List<SesionAprendizaje> filtrarPorCategoria(String categoria) {
-        return sesionRepository.findByCategoriaIgnoreCaseAndEstadoAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
-                categoria, EstadoSesion.ACTIVA, TipoSesion.PUBLICA, LocalDateTime.now());
+        return sesionRepository.findByCategoriaIgnoreCaseAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
+                categoria, TipoSesion.PUBLICA, LocalDateTime.now());
     }
 
     // us11: filtrar sesiones por modalidad (VIRTUAL o PRESENCIAL)
@@ -155,7 +154,7 @@ public class SesionService {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("modalidad invalida. Usa VIRTUAL o PRESENCIAL");
         }
-        return sesionRepository.findByModalidadAndEstadoAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
-                mod, EstadoSesion.ACTIVA, TipoSesion.PUBLICA, LocalDateTime.now());
+        return sesionRepository.findByModalidadAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
+                mod, TipoSesion.PUBLICA, LocalDateTime.now());
     }
 }

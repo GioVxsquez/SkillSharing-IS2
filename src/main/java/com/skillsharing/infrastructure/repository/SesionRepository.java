@@ -41,4 +41,16 @@ public interface SesionRepository extends JpaRepository<SesionAprendizaje, Long>
     // us11: filtrar por modalidad
     List<SesionAprendizaje> findByModalidadAndEstadoAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
             com.skillsharing.domain.enums.ModalidadSesion modalidad, EstadoSesion estado, TipoSesion tipo, LocalDateTime fecha);
+
+    // hu16: listar publicas sin filtrar por estado (incluye pendientes y activas)
+    List<SesionAprendizaje> findByTipoAndFechaSesionAfterOrderByFechaSesionAsc(
+            TipoSesion tipo, LocalDateTime fecha);
+
+    // us09: filtrar por categoria sin filtrar estado
+    List<SesionAprendizaje> findByCategoriaIgnoreCaseAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
+            String categoria, TipoSesion tipo, LocalDateTime fecha);
+
+    // us11: filtrar por modalidad sin filtrar estado
+    List<SesionAprendizaje> findByModalidadAndTipoAndFechaSesionAfterOrderByFechaSesionAsc(
+            com.skillsharing.domain.enums.ModalidadSesion modalidad, TipoSesion tipo, LocalDateTime fecha);
 }
