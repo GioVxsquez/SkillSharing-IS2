@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet,
-  ActivityIndicator, Alert, StatusBar, ScrollView, RefreshControl,
+  View, Text, FlatList, TouchableOpacity, StyleSheet,
+  ActivityIndicator, Alert, StatusBar, ScrollView,
 } from 'react-native';
 import { api } from '../api/config';
 
-// US22: Buscar instructores por habilidad
+// US22
 export default function BuscarInstructoresScreen({ navigation }: any) {
   const [habilidades, setHabilidades]   = useState<any[]>([]);
   const [instructores, setInstructores] = useState<any[]>([]);
@@ -35,19 +35,19 @@ export default function BuscarInstructoresScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1B3A6B" />
+      <StatusBar barStyle="light-content" backgroundColor="#0F1C36" />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backTexto}>← Volver</Text>
+          <Text style={styles.backTexto}>Volver</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitulo}>Buscar Instructores</Text>
+        <Text style={styles.headerTitulo}>Instructores</Text>
+        <View style={{ width: 40 }} />
       </View>
 
-      {/* Selector de habilidad */}
-      <View style={styles.seccionHab}>
-        <Text style={styles.label}>Selecciona una habilidad:</Text>
+      <View style={styles.habSeccion}>
+        <Text style={styles.habLabel}>¿Qué quieres aprender?</Text>
         {cargandoHab ? (
-          <ActivityIndicator color="#1B3A6B" />
+          <ActivityIndicator color="#F97316" />
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
             {habilidades.map((h) => (
@@ -65,9 +65,8 @@ export default function BuscarInstructoresScreen({ navigation }: any) {
         )}
       </View>
 
-      {/* Resultados */}
       {loading ? (
-        <ActivityIndicator size="large" color="#1B3A6B" style={{ marginTop: 40 }} />
+        <ActivityIndicator size="large" color="#F97316" style={{ marginTop: 40 }} />
       ) : (
         <FlatList
           data={instructores}
@@ -75,41 +74,38 @@ export default function BuscarInstructoresScreen({ navigation }: any) {
           contentContainerStyle={styles.lista}
           renderItem={({ item }) => (
             <View style={styles.card}>
-              <View style={styles.cardRow}>
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarTexto}>{item.nombre?.charAt(0)?.toUpperCase() || '?'}</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.nombre}>{item.nombre}</Text>
-                  <Text style={styles.email}>{item.email}</Text>
-                  {/* US20: reputacion del instructor */}
-                  {item.reputacionPromedio > 0 ? (
-                    <Text style={styles.reputacion}>
-                      {'★'.repeat(Math.round(item.reputacionPromedio))}{'☆'.repeat(5 - Math.round(item.reputacionPromedio))} {item.reputacionPromedio.toFixed(1)}
+              <View style={styles.avatar}>
+                <Text style={styles.avatarTexto}>{item.nombre?.charAt(0)?.toUpperCase() || '?'}</Text>
+              </View>
+              <View style={styles.cardDatos}>
+                <Text style={styles.nombre}>{item.nombre}</Text>
+                <Text style={styles.email}>{item.email}</Text>
+                {item.reputacionPromedio > 0 ? (
+                  <View style={styles.repRow}>
+                    <Text style={styles.repEstrellas}>
+                      {'★'.repeat(Math.round(item.reputacionPromedio))}{'☆'.repeat(5 - Math.round(item.reputacionPromedio))}
                     </Text>
-                  ) : (
-                    <Text style={styles.sinReputacion}>Sin calificaciones aún</Text>
-                  )}
-                  {/* US22: habilidades del instructor */}
-                  {item.habilidades?.length > 0 && (
-                    <View style={styles.habilidadesRow}>
-                      {item.habilidades.slice(0, 3).map((h: string, i: number) => (
-                        <View key={i} style={styles.habBadge}>
-                          <Text style={styles.habTexto}>{h}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  )}
-                </View>
+                    <Text style={styles.repNumero}>{item.reputacionPromedio.toFixed(1)}</Text>
+                  </View>
+                ) : (
+                  <Text style={styles.sinRep}>Sin calificaciones</Text>
+                )}
+                {item.habilidades?.length > 0 && (
+                  <View style={styles.habilidadesRow}>
+                    {item.habilidades.slice(0, 3).map((h: string, i: number) => (
+                      <View key={i} style={styles.habBadge}>
+                        <Text style={styles.habTexto}>{h}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
               </View>
             </View>
           )}
           ListEmptyComponent={
-            selected ? (
-              <Text style={styles.vacio}>No hay instructores con esta habilidad.</Text>
-            ) : (
-              <Text style={styles.vacio}>Selecciona una habilidad para buscar instructores.</Text>
-            )
+            <Text style={styles.vacio}>
+              {selected ? 'Nadie con esa habilidad por ahora.' : 'Elige una habilidad para ver instructores.'}
+            </Text>
           }
         />
       )}
@@ -118,28 +114,49 @@ export default function BuscarInstructoresScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F9FC' },
-  header: { backgroundColor: '#1B3A6B', paddingTop: 48, paddingBottom: 16, paddingHorizontal: 16 },
-  backTexto: { color: '#C8D8F0', fontSize: 14, marginBottom: 6, fontWeight: '600' },
-  headerTitulo: { color: '#FFFFFF', fontSize: 18, fontWeight: '700' },
-  seccionHab: { backgroundColor: '#FFFFFF', padding: 16, borderBottomWidth: 1, borderBottomColor: '#E2E8F0' },
-  label: { fontSize: 13, fontWeight: '700', color: '#4A5568', marginBottom: 10 },
-  chipsRow: { gap: 8, paddingRight: 16 },
-  chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: '#EDF2F7', borderWidth: 1.5, borderColor: '#E2E8F0' },
-  chipActivo: { backgroundColor: '#1B3A6B', borderColor: '#1B3A6B' },
+  container: { flex: 1, backgroundColor: '#F0F4F8' },
+  header: {
+    backgroundColor: '#0F1C36',
+    paddingTop: 52, paddingBottom: 20, paddingHorizontal: 20,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+  },
+  backTexto: { color: '#8898AA', fontSize: 14, fontWeight: '600' },
+  headerTitulo: { color: '#FFFFFF', fontSize: 18, fontWeight: '800' },
+  habSeccion: {
+    backgroundColor: '#FFFFFF', paddingVertical: 16,
+    borderBottomWidth: 1, borderBottomColor: '#E8EDF2',
+  },
+  habLabel: { fontSize: 13, fontWeight: '700', color: '#4A5568', marginBottom: 12, paddingHorizontal: 16 },
+  chipsRow: { gap: 8, paddingHorizontal: 16 },
+  chip: {
+    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
+    backgroundColor: '#F0F4F8', borderWidth: 1.5, borderColor: '#E2E8F0',
+  },
+  chipActivo: { backgroundColor: '#F97316', borderColor: '#F97316' },
   chipTexto: { fontSize: 13, color: '#4A5568', fontWeight: '600' },
-  chipTextoActivo: { color: '#FFFFFF' },
+  chipTextoActivo: { color: '#FFFFFF', fontWeight: '700' },
   lista: { padding: 16 },
-  card: { backgroundColor: '#FFFFFF', borderRadius: 14, padding: 16, marginBottom: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
-  cardRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  avatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#1B3A6B', justifyContent: 'center', alignItems: 'center' },
-  avatarTexto: { color: '#FFD700', fontSize: 20, fontWeight: '800' },
-  nombre: { fontSize: 15, fontWeight: '700', color: '#1A202C' },
-  email: { fontSize: 13, color: '#718096', marginTop: 2 },
-  habilidadesRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 },
-  habBadge: { backgroundColor: '#EBF4FF', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 },
-  habTexto: { fontSize: 11, color: '#1B3A6B', fontWeight: '600' },
-  reputacion: { fontSize: 14, color: '#D69E2E', fontWeight: '700', marginTop: 4 },
-  sinReputacion: { fontSize: 12, color: '#A0AEC0', marginTop: 4, fontStyle: 'italic' },
-  vacio: { textAlign: 'center', color: '#718096', marginTop: 60, fontSize: 15 },
+  card: {
+    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 12,
+    flexDirection: 'row', alignItems: 'flex-start', gap: 14,
+    shadowColor: '#0F1C36', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 8, elevation: 3,
+  },
+  avatar: {
+    width: 52, height: 52, borderRadius: 26,
+    backgroundColor: '#0F1C36',
+    justifyContent: 'center', alignItems: 'center',
+    flexShrink: 0,
+  },
+  avatarTexto: { color: '#F97316', fontSize: 22, fontWeight: '900' },
+  cardDatos: { flex: 1 },
+  nombre: { fontSize: 15, fontWeight: '800', color: '#0F1C36', marginBottom: 2 },
+  email: { fontSize: 13, color: '#8898AA', marginBottom: 6 },
+  repRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
+  repEstrellas: { color: '#F59E0B', fontSize: 14, fontWeight: '700' },
+  repNumero: { color: '#F59E0B', fontSize: 13, fontWeight: '700' },
+  sinRep: { fontSize: 12, color: '#CBD5E0', marginBottom: 6 },
+  habilidadesRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  habBadge: { backgroundColor: '#FFF0E6', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 },
+  habTexto: { fontSize: 11, color: '#F97316', fontWeight: '700' },
+  vacio: { textAlign: 'center', color: '#8898AA', marginTop: 60, fontSize: 15 },
 });

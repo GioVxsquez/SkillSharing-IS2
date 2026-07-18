@@ -38,9 +38,9 @@ public class SesionResponseDto {
         dto.setTitulo(s.getTitulo());
         dto.setDescripcion(s.getDescripcion());
         dto.setFechaSesion(s.getFechaSesion());
-        dto.setModalidad(s.getModalidad().name());
-        dto.setTipo(s.getTipo().name());
-        dto.setEstado(s.getEstado().name());
+        dto.setModalidad(s.getModalidad() != null ? s.getModalidad().name() : "VIRTUAL");
+        dto.setTipo(s.getTipo() != null ? s.getTipo().name() : "PUBLICA");
+        dto.setEstado(s.getEstado() != null ? s.getEstado().name() : "PENDIENTE");
         dto.setMaxParticipantes(s.getMaxParticipantes());
         dto.setCapacidadMaxima(s.getMaxParticipantes());
         dto.setDuracionMinutos(60);

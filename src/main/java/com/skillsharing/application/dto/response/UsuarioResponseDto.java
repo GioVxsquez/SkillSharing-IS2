@@ -23,7 +23,7 @@ public class UsuarioResponseDto {
         dto.setNombre(u.getNombre());
         dto.setEmail(u.getEmail());
         dto.setFotoPerfil(u.getFotoPerfil());
-        dto.setRol(u.getRol().name());
+        dto.setRol(u.getRol() != null ? u.getRol().name() : "APRENDIZ");
         dto.setFechaRegistro(u.getFechaRegistro());
         return dto;
     }
